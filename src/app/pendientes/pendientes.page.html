@@ -1,0 +1,71 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Pendientes</ion-title>
+  </ion-toolbar>
+  <ion-toolbar color="primary">
+    <ion-segment [value]="filtro()" (ionChange)="onSegment($any($event).detail.value)">
+      <ion-segment-button value="PENDIENTE">
+        <ion-label>Por revisar</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="REVISADO">
+        <ion-label>Por aprobar</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding-horizontal">
+  <ion-refresher slot="fixed" (ionRefresh)="cargar($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  @if (loading()) {
+    <div class="center">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+  } @else if (error()) {
+    <div class="center empty">
+      <ion-icon name="file-tray-outline"></ion-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (cuentas().length === 0) {
+    <div class="center empty">
+      <ion-icon name="file-tray-outline"></ion-icon>
+      <p>No hay cuentas {{ filtro() === 'PENDIENTE' ? 'por revisar' : 'por aprobar' }}.</p>
+    </div>
+  } @else {
+    <ion-list lines="none" class="cards">
+      @for (c of cuentas(); track c.id) {
+        <ion-card button (click)="abrir(c)" class="cuenta-card">
+          <ion-card-content>
+            <div class="row top">
+              <ion-badge color="tertiary">{{ c.empresa_abreviatura || c.empresa }}</ion-badge>
+              <ion-badge [color]="filtro() === 'PENDIENTE' ? 'warning' : 'secondary'">
+                {{ c.estado }}
+              </ion-badge>
+            </div>
+
+            <h2 class="beneficiario">{{ c.beneficiario || 'Sin beneficiario' }}</h2>
+            <p class="concepto">{{ c.concepto }}</p>
+
+            <div class="valor">{{ cop(c.valor_solicitado) }}</div>
+
+            <div class="row meta">
+              <span class="meta-item">
+                <ion-icon name="calendar-outline"></ion-icon>
+                Vence {{ fecha(c.fecha_vencimiento) }}
+              </span>
+              @if (tieneSoporte(c)) {
+                <ion-chip color="success" outline="true" class="soporte-chip">
+                  <ion-icon name="attach-outline"></ion-icon>
+                  <ion-label>Soporte</ion-label>
+                </ion-chip>
+              }
+            </div>
+          </ion-card-content>
+          <ion-icon class="chevron" name="chevron-forward-outline"></ion-icon>
+        </ion-card>
+      }
+    </ion-list>
+  }
+</ion-content>

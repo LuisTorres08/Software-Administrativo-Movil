@@ -1,0 +1,137 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/pendientes" text="Atrás"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalle de cuenta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  @if (loading()) {
+    <div class="center"><ion-spinner name="crescent"></ion-spinner></div>
+  } @else if (!cuenta()) {
+    <div class="center empty">
+      <ion-icon name="document-text-outline"></ion-icon>
+      <p>No se encontró la cuenta.</p>
+    </div>
+  } @else {
+    @let c = cuenta()!;
+
+    <ion-card class="head-card">
+      <ion-card-content>
+        <div class="head-row">
+          <ion-badge color="tertiary">{{ c.empresa_abreviatura || c.empresa }}</ion-badge>
+          <ion-badge color="medium">{{ c.estado }}</ion-badge>
+        </div>
+        <h1>{{ c.beneficiario || 'Sin beneficiario' }}</h1>
+        @if (c.nit_beneficiario) {
+          <p class="nit">NIT {{ c.nit_beneficiario }}</p>
+        }
+        <div class="valor">{{ cop(c.valor_solicitado) }}</div>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-header><ion-card-title>Información</ion-card-title></ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full">
+          <ion-item><ion-label><p>Empresa</p><h3>{{ c.empresa || '—' }}</h3></ion-label></ion-item>
+          <ion-item><ion-label><p>Concepto</p><h3>{{ c.concepto || '—' }}</h3></ion-label></ion-item>
+          <ion-item><ion-label><p>Tipo</p><h3>{{ c.tipo || '—' }}</h3></ion-label></ion-item>
+          <ion-item><ion-label><p>Centro de costo</p><h3>{{ c.centro_costo || '—' }}</h3></ion-label></ion-item>
+          <ion-item><ion-label><p>N.° factura</p><h3>{{ c.numero_factura || '—' }}</h3></ion-label></ion-item>
+          <ion-item><ion-label><p>N.° lote</p><h3>{{ c.numero_lote || '—' }}</h3></ion-label></ion-item>
+          <ion-item><ion-label><p>Vencimiento</p><h3>{{ fecha(c.fecha_vencimiento) }}</h3></ion-label></ion-item>
+          <ion-item><ion-label><p>Valor solicitado</p><h3>{{ cop(c.valor_solicitado) }}</h3></ion-label></ion-item>
+          <ion-item><ion-label><p>Valor pagado</p><h3>{{ cop(c.valor_pagado) }}</h3></ion-label></ion-item>
+          <ion-item lines="none"><ion-label><p>Valor pendiente</p><h3>{{ cop(c.valor_pendiente) }}</h3></ion-label></ion-item>
+        </ion-list>
+
+        @if (c.link) {
+          <ion-button expand="block" fill="outline" class="mt" (click)="abrirSoporte(c.link)">
+            <ion-icon slot="start" name="document-text-outline"></ion-icon>
+            Ver soporte de la cuenta
+          </ion-button>
+        }
+      </ion-card-content>
+    </ion-card>
+
+    @if (tieneRetenciones) {
+      @let r = retenciones()!;
+      <ion-card>
+        <ion-card-header><ion-card-title>Retenciones</ion-card-title></ion-card-header>
+        <ion-card-content>
+          <ion-list lines="full">
+            @if (r.iva !== null && r.iva !== undefined) {
+              <ion-item><ion-label><p>IVA</p><h3>{{ cop(r.iva) }}</h3></ion-label></ion-item>
+            }
+            @if (r.retefuente !== null && r.retefuente !== undefined) {
+              <ion-item><ion-label><p>Retefuente</p><h3>{{ cop(r.retefuente) }}</h3></ion-label></ion-item>
+            }
+            @if (r.reteica !== null && r.reteica !== undefined) {
+              <ion-item><ion-label><p>ReteICA</p><h3>{{ cop(r.reteica) }}</h3></ion-label></ion-item>
+            }
+            @if (r.reteiva !== null && r.reteiva !== undefined) {
+              <ion-item><ion-label><p>ReteIVA</p><h3>{{ cop(r.reteiva) }}</h3></ion-label></ion-item>
+            }
+            <ion-item><ion-label><p>Total retenciones</p><h3>{{ cop(r.total_retenciones) }}</h3></ion-label></ion-item>
+            <ion-item lines="none" class="neto">
+              <ion-label><p>Valor neto</p><h3>{{ cop(r.valor_neto) }}</h3></ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    <ion-card>
+      <ion-card-header><ion-card-title>Pagos</ion-card-title></ion-card-header>
+      <ion-card-content>
+        @if (pagos().length === 0) {
+          <ion-note class="muted">Sin pagos registrados.</ion-note>
+        } @else {
+          <ion-list lines="full">
+            @for (p of pagos(); track p.id) {
+              <ion-item>
+                <ion-label>
+                  <h3>{{ cop(p.valor) }}</h3>
+                  <p>{{ fecha(p.fecha_pago) }} · {{ p.banco || 'Banco n/d' }}</p>
+                  @if (p.referencia) { <p>Ref: {{ p.referencia }}</p> }
+                </ion-label>
+                @if (p.soporte_url) {
+                  <ion-button slot="end" fill="clear" size="small" (click)="abrirSoporte(p.soporte_url)">
+                    <ion-icon slot="icon-only" name="open-outline"></ion-icon>
+                  </ion-button>
+                }
+              </ion-item>
+            }
+          </ion-list>
+        }
+      </ion-card-content>
+    </ion-card>
+
+    @if (c.estado === 'PENDIENTE' || c.estado === 'REVISADO') {
+      <div class="acciones">
+        @if (c.estado === 'PENDIENTE') {
+          <ion-button expand="block" color="success" [disabled]="saving()" (click)="confirmar('REVISADO')">
+            <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+            Marcar revisado
+          </ion-button>
+        }
+        @if (c.estado === 'REVISADO') {
+          <ion-button expand="block" color="success" [disabled]="saving()" (click)="confirmar('APROBADO')">
+            <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+            Aprobar
+          </ion-button>
+        }
+        <ion-button expand="block" color="danger" fill="outline" [disabled]="saving()" (click)="confirmar('NEGADO')">
+          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+          Negar
+        </ion-button>
+        @if (saving()) {
+          <div class="center"><ion-spinner name="crescent"></ion-spinner></div>
+        }
+      </div>
+    }
+  }
+</ion-content>

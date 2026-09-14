@@ -1,0 +1,33 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="avatar-wrap">
+    <div class="avatar">{{ iniciales }}</div>
+    <h2>{{ nombre || usuario }}</h2>
+    <p>Revisor CxP</p>
+  </div>
+
+  <ion-card>
+    <ion-card-content>
+      <ion-item lines="full">
+        <ion-icon slot="start" name="person-outline" color="primary"></ion-icon>
+        <ion-label><p>Usuario</p><h3>{{ usuario || '—' }}</h3></ion-label>
+      </ion-item>
+      @if (email) {
+        <ion-item lines="none">
+          <ion-icon slot="start" name="at-outline" color="primary"></ion-icon>
+          <ion-label><p>Correo</p><h3>{{ email }}</h3></ion-label>
+        </ion-item>
+      }
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button expand="block" color="danger" fill="outline" class="logout" (click)="logout()">
+    <ion-icon slot="start" name="log-out-outline"></ion-icon>
+    Cerrar sesión
+  </ion-button>
+</ion-content>

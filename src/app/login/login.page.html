@@ -1,0 +1,48 @@
+<ion-content class="login-content" [fullscreen]="true">
+  <div class="login-wrap">
+    <div class="brand">
+      <div class="monogram">CxP</div>
+      <h1>Revisor CxP</h1>
+      <p>Cuentas por pagar en tu bolsillo</p>
+    </div>
+
+    <form class="login-card" [formGroup]="form" (ngSubmit)="submit()">
+      <ion-item lines="none" class="field">
+        <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
+        <ion-input
+          label="Usuario"
+          labelPlacement="floating"
+          formControlName="usuario"
+          autocomplete="username"
+          type="text"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="field">
+        <ion-icon slot="start" name="lock-closed-outline" aria-hidden="true"></ion-icon>
+        <ion-input
+          label="Contraseña"
+          labelPlacement="floating"
+          formControlName="clave"
+          type="password"
+          autocomplete="current-password"
+        ></ion-input>
+      </ion-item>
+
+      @if (error()) {
+        <ion-note color="danger" class="error">
+          <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+          {{ error() }}
+        </ion-note>
+      }
+
+      <ion-button expand="block" type="submit" [disabled]="loading()" class="submit">
+        @if (loading()) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          Iniciar sesión
+        }
+      </ion-button>
+    </form>
+  </div>
+</ion-content>

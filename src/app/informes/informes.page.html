@@ -1,0 +1,118 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Informes de pagos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-card class="filtros">
+    <ion-card-content>
+      <ion-item lines="none">
+        <ion-select
+          label="Empresa"
+          labelPlacement="stacked"
+          interface="popover"
+          placeholder="Todas"
+          [(ngModel)]="empresaId"
+          (ionChange)="cargar()"
+        >
+          <ion-select-option [value]="''">Todas</ion-select-option>
+          @for (e of empresas(); track e.id) {
+            <ion-select-option [value]="e.id">{{ e.nombre }}</ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+      <div class="fechas">
+        <ion-item lines="none">
+          <ion-input
+            label="Desde"
+            labelPlacement="stacked"
+            type="date"
+            [(ngModel)]="desde"
+            (ionChange)="cargar()"
+          ></ion-input>
+        </ion-item>
+        <ion-item lines="none">
+          <ion-input
+            label="Hasta"
+            labelPlacement="stacked"
+            type="date"
+            [(ngModel)]="hasta"
+            (ionChange)="cargar()"
+          ></ion-input>
+        </ion-item>
+      </div>
+      <ion-button expand="block" fill="clear" size="small" (click)="cargar()">
+        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+        Actualizar
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  @if (loading()) {
+    <div class="center"><ion-spinner name="crescent"></ion-spinner></div>
+  } @else if (error()) {
+    <div class="center empty">
+      <ion-icon name="bar-chart-outline"></ion-icon>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (data()) {
+    <ion-card class="kpi">
+      <ion-card-content>
+        <div class="kpi-icon"><ion-icon name="cash-outline"></ion-icon></div>
+        <div>
+          <p class="kpi-label">Total pagado</p>
+          <div class="kpi-value">{{ cop(totalPagado) }}</div>
+          <p class="kpi-sub">{{ numPagos }} pagos</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    @if ((data()!.por_empresa).length) {
+      <ion-card>
+        <ion-card-header><ion-card-title>Pagado por empresa</ion-card-title></ion-card-header>
+        <ion-card-content>
+          <div class="chart-box"><canvas #empresaCanvas></canvas></div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if ((data()!.por_empresa_mes).length) {
+      <ion-card>
+        <ion-card-header><ion-card-title>Por empresa y mes</ion-card-title></ion-card-header>
+        <ion-card-content>
+          <div class="chart-box"><canvas #mesCanvas></canvas></div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if ((data()!.por_proveedor).length) {
+      <ion-card>
+        <ion-card-header><ion-card-title>Top proveedores</ion-card-title></ion-card-header>
+        <ion-card-content>
+          <div class="chart-box"><canvas #proveedorCanvas></canvas></div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if ((data()!.por_centro_costo).length) {
+      <ion-card>
+        <ion-card-header><ion-card-title>Por centro de costo</ion-card-title></ion-card-header>
+        <ion-card-content>
+          <div class="chart-box"><canvas #centroCanvas></canvas></div>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    @if (
+      !(data()!.por_empresa).length &&
+      !(data()!.por_proveedor).length &&
+      !(data()!.por_centro_costo).length
+    ) {
+      <div class="center empty">
+        <ion-icon name="bar-chart-outline"></ion-icon>
+        <p>No hay datos de pagos para los filtros seleccionados.</p>
+      </div>
+    }
+  }
+</ion-content>
