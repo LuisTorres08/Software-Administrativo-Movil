@@ -18,6 +18,8 @@
   } @else {
     @let c = cuenta()!;
 
+    <div class="detalle">
+    <div class="col col-a">
     <ion-card class="head-card">
       <ion-card-content>
         <div class="head-row">
@@ -56,7 +58,9 @@
         }
       </ion-card-content>
     </ion-card>
+    </div><!-- col-a -->
 
+    <div class="col col-b">
     @if (tieneRetenciones) {
       @let r = retenciones()!;
       <ion-card>
@@ -109,6 +113,7 @@
         }
       </ion-card-content>
     </ion-card>
+    </div><!-- col-b -->
 
     @if (c.estado === 'PENDIENTE' || c.estado === 'REVISADO') {
       <div class="acciones">
@@ -133,5 +138,6 @@
         }
       </div>
     }
+    </div><!-- .detalle -->
   }
 </ion-content>

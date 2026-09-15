@@ -72,4 +72,44 @@ ion-item h3 {
   display: flex;
   flex-direction: column;
   gap: 10px;
+
+  ion-button { --border-radius: 12px; font-weight: 600; }
+}
+
+// Contenedor responsivo del detalle
+.detalle { display: block; }
+
+// ── Modo horizontal (al voltear el celular): 2 columnas + aprobación cómoda ──
+@media (orientation: landscape) {
+  .detalle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .col { display: flex; flex-direction: column; gap: 12px; }
+  .col ion-card { margin-left: 0; margin-right: 0; }
+
+  // Acciones a lo ancho, botones grandes y en fila
+  .acciones {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    gap: 14px;
+    margin: 4px 0 20px;
+
+    ion-button {
+      flex: 1;
+      margin: 0;
+      height: 60px;
+      font-size: 16px;
+      --padding-top: 20px;
+      --padding-bottom: 20px;
+    }
+    .center { flex: 0 0 auto; padding: 0 8px; }
+  }
+
+  .head-card .valor { font-size: 30px; }
 }

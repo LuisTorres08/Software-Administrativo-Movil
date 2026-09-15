@@ -1,160 +1,145 @@
-// ── Resumen consolidado (fijo, dentro del header plomo) ──
+// ── Resumen consolidado (fijo, sobre el header plomo) ──
 .resumen {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  padding: 8px 12px 12px;
+  padding: 6px 12px 10px;
   background: var(--ion-color-primary);
 
   .tile {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 2px;
-    padding: 8px 4px;
+    gap: 1px;
+    padding: 7px 4px;
     border-radius: 10px;
     background: rgba(255, 255, 255, 0.12);
     border: 1px solid rgba(255, 255, 255, 0.14);
-
-    .lbl {
-      font-size: 10px;
-      letter-spacing: 0.4px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.72);
-    }
-    .val {
-      font-size: 17px;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.1;
-    }
-
-    // "Por aprobar" — lo más relevante para el revisor
-    &.hl {
-      background: rgba(255, 255, 255, 0.22);
-      border-color: rgba(255, 255, 255, 0.35);
-      .val { color: #ffe08a; }
-    }
-    // "Aprobado" — verde suave
+    .lbl { font-size: 9.5px; letter-spacing: 0.4px; text-transform: uppercase; color: rgba(255, 255, 255, 0.72); }
+    .val { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.1; }
+    &.hl { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.35); .val { color: #ffe08a; } }
     &.ok .val { color: #8ff0b6; }
   }
 }
 
-// ── Estados (carga / vacío / error) ──
-.center {
+// ── Filtros (empresa + orden) ──
+.filtros {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 55vh;
-  &.empty {
-    color: var(--ion-color-medium);
-    ion-icon { font-size: 52px; margin-bottom: 8px; opacity: 0.6; }
-    p { margin: 0; font-size: 14px; }
-  }
-}
+  gap: 8px;
+  padding: 8px 10px;
+  background: #f6f7f9;
+  border-bottom: 1px solid #e6e8ec;
+  position: sticky;
+  top: 0;
+  z-index: 3;
 
-// ── Grilla de cuentas ──
-.grid {
-  padding: 0;
-
-  .grid-head {
-    display: grid;
-    grid-template-columns: 64px 1fr auto;
-    gap: 8px;
+  .f {
+    flex: 1;
+    display: flex;
     align-items: center;
-    padding: 9px 14px;
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: var(--ion-color-medium);
-    background: #eef0f3;
-    border-bottom: 1px solid #dfe2e7;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    .r { text-align: right; }
-  }
-
-  .grid-row {
-    display: grid;
-    grid-template-columns: 64px 1fr auto;
-    gap: 8px;
-    align-items: center;
-    width: 100%;
-    text-align: left;
-    padding: 11px 14px;
+    gap: 4px;
     background: #fff;
-    border: 0;
-    border-bottom: 1px solid #eceef1;
-    cursor: pointer;
-
-    &:nth-child(even) { background: #fafbfc; }
-    &:active { background: #eef0f3; }
-
-    .emp {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--ion-color-primary);
-      background: #eef0f3;
-      border-radius: 6px;
-      padding: 4px 5px;
-      text-align: center;
-      line-height: 1.15;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .ben {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      min-width: 0;
-      b {
-        font-size: 14px;
-        font-weight: 600;
-        color: #29313d;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .cpt {
-        font-size: 12px;
-        color: #6b7280;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .venc {
-        font-size: 11px;
-        color: #9aa0ab;
-        display: flex;
-        align-items: center;
-        gap: 3px;
-        ion-icon { font-size: 12px; }
-        .clip { color: var(--ion-color-success); font-size: 13px; margin-left: 4px; }
-      }
-    }
-
-    .val {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-      font-size: 14px;
-      font-weight: 800;
-      color: #29313d;
-      white-space: nowrap;
-      ion-icon { font-size: 16px; color: var(--ion-color-medium); }
-    }
+    border: 1px solid #dfe2e7;
+    border-radius: 9px;
+    padding: 2px 6px;
+    min-width: 0;
+    ion-icon { color: var(--ion-color-primary); font-size: 16px; flex: 0 0 auto; }
+    ion-select { flex: 1; min-width: 0; font-size: 13px; --padding-start: 2px; --padding-end: 2px; }
   }
 }
 
-.count {
-  text-align: center;
-  padding: 12px;
-  font-size: 12px;
-  color: var(--ion-color-medium);
+// ── Estados ──
+.center {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 46vh;
+  &.empty { color: var(--ion-color-medium);
+    ion-icon { font-size: 52px; margin-bottom: 8px; opacity: 0.55; }
+    p { margin: 0 24px; font-size: 14px; text-align: center; }
+  }
 }
+
+// ── Encabezado de grupo (orden por empresa) ──
+.grupo-head {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 16px 5px;
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase;
+  color: var(--ion-color-primary);
+  ion-icon { font-size: 14px; }
+  .n { margin-left: auto; background: #e7eaee; color: #5b6472; border-radius: 20px; padding: 1px 8px; font-size: 11px; }
+}
+
+// ── Lista de cuentas ──
+.lista { padding: 10px 12px 0; display: flex; flex-direction: column; gap: 10px; }
+
+.item {
+  display: flex;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  border: 1px solid #e9ebef;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(30, 35, 45, 0.06);
+  cursor: pointer;
+  &:active { background: #f7f8fa; }
+
+  .stripe {
+    flex: 0 0 5px;
+    &.vencida { background: #e5484d; }
+    &.hoy     { background: #f2620f; }
+    &.pronto  { background: #f59e0b; }
+    &.semana  { background: #eab308; }
+    &.ok      { background: #10b981; }
+    &.none    { background: #cbd2da; }
+  }
+
+  .body { flex: 1; min-width: 0; padding: 11px 13px; }
+
+  .l1 {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 3px;
+    .emp {
+      font-size: 11.5px; font-weight: 700; color: var(--ion-color-primary);
+      background: #eef1f4; border-radius: 6px; padding: 3px 8px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%;
+    }
+    .urg {
+      display: inline-flex; align-items: center; gap: 3px; flex: 0 0 auto;
+      font-size: 11px; font-weight: 700; border-radius: 20px; padding: 3px 8px;
+      ion-icon { font-size: 12px; }
+      &.vencida { background: #fdecec; color: #c62828; }
+      &.hoy     { background: #fdeee4; color: #c94b12; }
+      &.pronto  { background: #fef2e0; color: #b06f0a; }
+      &.semana  { background: #fdf6d8; color: #8a6d05; }
+      &.ok      { background: #e6f7ef; color: #0b8a5b; }
+      &.none    { background: #eef1f4; color: #6b7280; }
+    }
+  }
+
+  .ben { font-size: 15px; font-weight: 600; color: #232b36; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cpt { font-size: 12.5px; color: #6b7280; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .l3 {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 7px;
+    .fecha { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #7a828e;
+      ion-icon { font-size: 13px; } }
+    .val { font-size: 16px; font-weight: 800; color: #1f2732; white-space: nowrap; }
+  }
+
+  .l4 {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    margin-top: 9px; padding-top: 9px; border-top: 1px dashed #e9ebef;
+
+    .soporte {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12.5px; font-weight: 600; color: var(--ion-color-primary);
+      background: #eef1f4; border: 0; border-radius: 8px; padding: 6px 11px; cursor: pointer;
+      ion-icon { font-size: 15px; }
+      &:active { background: #e2e6eb; }
+    }
+    .sin-soporte { font-size: 12px; color: #aab0b9; font-style: italic; }
+    .ver { display: inline-flex; align-items: center; gap: 2px; font-size: 12.5px; font-weight: 600; color: #8a919c;
+      ion-icon { font-size: 15px; } }
+  }
+}
+
+.count { text-align: center; padding: 14px; font-size: 12px; color: var(--ion-color-medium); }
