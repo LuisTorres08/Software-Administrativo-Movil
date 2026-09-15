@@ -1,7 +1,24 @@
 <ion-header>
   <ion-toolbar color="primary">
-    <ion-title>Pendientes</ion-title>
+    <ion-title>Pendientes CxP</ion-title>
   </ion-toolbar>
+
+  <!-- Resumen consolidado (fijo) -->
+  <div class="resumen">
+    <div class="tile">
+      <span class="lbl">Por revisar</span>
+      <span class="val">{{ compact(resumen()?.pendiente) }}</span>
+    </div>
+    <div class="tile hl">
+      <span class="lbl">Por aprobar</span>
+      <span class="val">{{ compact(resumen()?.revisado) }}</span>
+    </div>
+    <div class="tile ok">
+      <span class="lbl">Aprobado</span>
+      <span class="val">{{ compact(resumen()?.aprobado) }}</span>
+    </div>
+  </div>
+
   <ion-toolbar color="primary">
     <ion-segment [value]="filtro()" (ionChange)="onSegment($any($event).detail.value)">
       <ion-segment-button value="PENDIENTE">
@@ -14,7 +31,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding-horizontal">
+<ion-content [fullscreen]="true">
   <ion-refresher slot="fixed" (ionRefresh)="cargar($any($event))">
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
@@ -34,38 +51,34 @@
       <p>No hay cuentas {{ filtro() === 'PENDIENTE' ? 'por revisar' : 'por aprobar' }}.</p>
     </div>
   } @else {
-    <ion-list lines="none" class="cards">
+    <div class="grid">
+      <div class="grid-head">
+        <span>Empresa</span>
+        <span>Beneficiario / Concepto</span>
+        <span class="r">Valor</span>
+      </div>
       @for (c of cuentas(); track c.id) {
-        <ion-card button (click)="abrir(c)" class="cuenta-card">
-          <ion-card-content>
-            <div class="row top">
-              <ion-badge color="tertiary">{{ c.empresa_abreviatura || c.empresa }}</ion-badge>
-              <ion-badge [color]="filtro() === 'PENDIENTE' ? 'warning' : 'secondary'">
-                {{ c.estado }}
-              </ion-badge>
-            </div>
-
-            <h2 class="beneficiario">{{ c.beneficiario || 'Sin beneficiario' }}</h2>
-            <p class="concepto">{{ c.concepto }}</p>
-
-            <div class="valor">{{ cop(c.valor_solicitado) }}</div>
-
-            <div class="row meta">
-              <span class="meta-item">
-                <ion-icon name="calendar-outline"></ion-icon>
-                Vence {{ fecha(c.fecha_vencimiento) }}
-              </span>
+        <button class="grid-row" (click)="abrir(c)">
+          <span class="emp">{{ c.empresa_abreviatura || c.empresa }}</span>
+          <span class="ben">
+            <b>{{ c.beneficiario || 'Sin beneficiario' }}</b>
+            <small class="cpt">{{ c.concepto }}</small>
+            <small class="venc">
+              <ion-icon name="calendar-outline"></ion-icon> Vence {{ fecha(c.fecha_vencimiento) }}
               @if (tieneSoporte(c)) {
-                <ion-chip color="success" outline="true" class="soporte-chip">
-                  <ion-icon name="attach-outline"></ion-icon>
-                  <ion-label>Soporte</ion-label>
-                </ion-chip>
+                <ion-icon name="attach-outline" class="clip"></ion-icon>
               }
-            </div>
-          </ion-card-content>
-          <ion-icon class="chevron" name="chevron-forward-outline"></ion-icon>
-        </ion-card>
+            </small>
+          </span>
+          <span class="val">
+            {{ cop(c.valor_solicitado) }}
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </span>
+        </button>
       }
-    </ion-list>
+    </div>
+    <div class="count">
+      {{ cuentas().length }} cuenta(s) {{ filtro() === 'PENDIENTE' ? 'por revisar' : 'por aprobar' }}
+    </div>
   }
 </ion-content>

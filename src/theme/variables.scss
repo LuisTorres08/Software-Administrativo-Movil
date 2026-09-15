@@ -1,30 +1,30 @@
-// Revisor CxP — tema empresarial (morado corporativo)
+// Revisor CxP — tema empresarial (plomo / grafito)
 // Documentación de theming: https://ionicframework.com/docs/theming/
 
 :root {
-  /** primary — morado corporativo **/
-  --ion-color-primary: #6d5bd6;
-  --ion-color-primary-rgb: 109, 91, 214;
+  /** primary — plomo grafito **/
+  --ion-color-primary: #4b5563;
+  --ion-color-primary-rgb: 75, 85, 99;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #6050bc;
-  --ion-color-primary-tint: #7c6bda;
+  --ion-color-primary-shade: #424a57;
+  --ion-color-primary-tint: #5d6572;
 
-  /** secondary **/
-  --ion-color-secondary: #3dc2ff;
-  --ion-color-secondary-rgb: 61, 194, 255;
+  /** secondary — plomo medio **/
+  --ion-color-secondary: #6b7280;
+  --ion-color-secondary-rgb: 107, 114, 128;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #36abe0;
-  --ion-color-secondary-tint: #50c8ff;
+  --ion-color-secondary-shade: #5e6470;
+  --ion-color-secondary-tint: #7a808d;
 
-  /** tertiary **/
-  --ion-color-tertiary: #5260ff;
-  --ion-color-tertiary-rgb: 82, 96, 255;
+  /** tertiary — plomo claro **/
+  --ion-color-tertiary: #64748b;
+  --ion-color-tertiary-rgb: 100, 116, 139;
   --ion-color-tertiary-contrast: #ffffff;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #4854e0;
-  --ion-color-tertiary-tint: #6370ff;
+  --ion-color-tertiary-shade: #58667a;
+  --ion-color-tertiary-tint: #748196;
 
   /** success **/
   --ion-color-success: #2dd36f;

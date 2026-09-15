@@ -1,101 +1,160 @@
+// ── Resumen consolidado (fijo, dentro del header plomo) ──
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px 12px 12px;
+  background: var(--ion-color-primary);
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 8px 4px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+
+    .lbl {
+      font-size: 10px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.72);
+    }
+    .val {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    // "Por aprobar" — lo más relevante para el revisor
+    &.hl {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.35);
+      .val { color: #ffe08a; }
+    }
+    // "Aprobado" — verde suave
+    &.ok .val { color: #8ff0b6; }
+  }
+}
+
+// ── Estados (carga / vacío / error) ──
 .center {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 16px;
-}
-
-.empty {
-  color: var(--ion-color-medium);
-  text-align: center;
-
-  ion-icon {
-    font-size: 56px;
-    margin-bottom: 12px;
-    opacity: 0.6;
-  }
-
-  p {
-    margin: 0;
-    font-size: 15px;
+  min-height: 55vh;
+  &.empty {
+    color: var(--ion-color-medium);
+    ion-icon { font-size: 52px; margin-bottom: 8px; opacity: 0.6; }
+    p { margin: 0; font-size: 14px; }
   }
 }
 
-.cards {
-  background: transparent;
-  padding-top: 12px;
-}
+// ── Grilla de cuentas ──
+.grid {
+  padding: 0;
 
-.cuenta-card {
-  position: relative;
-  border-radius: 16px;
-  margin: 0 0 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-
-  ion-card-content {
-    padding: 14px 40px 14px 14px;
-  }
-
-  .row {
-    display: flex;
-    align-items: center;
+  .grid-head {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
     gap: 8px;
-  }
-
-  .top {
-    justify-content: space-between;
-    margin-bottom: 8px;
-  }
-
-  .beneficiario {
-    font-size: 16px;
-    font-weight: 700;
-    margin: 0 0 2px;
-    color: var(--ion-text-color);
-  }
-
-  .concepto {
-    margin: 0 0 8px;
-    font-size: 13px;
-    color: var(--ion-color-medium);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .valor {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--ion-color-primary);
-    margin-bottom: 8px;
-  }
-
-  .meta {
-    justify-content: space-between;
-    flex-wrap: wrap;
-  }
-
-  .meta-item {
-    display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 12px;
+    padding: 9px 14px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
     color: var(--ion-color-medium);
+    background: #eef0f3;
+    border-bottom: 1px solid #dfe2e7;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    .r { text-align: right; }
   }
 
-  .soporte-chip {
-    height: 24px;
-    font-size: 11px;
-  }
+  .grid-row {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    padding: 11px 14px;
+    background: #fff;
+    border: 0;
+    border-bottom: 1px solid #eceef1;
+    cursor: pointer;
 
-  .chevron {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--ion-color-medium);
-    font-size: 20px;
+    &:nth-child(even) { background: #fafbfc; }
+    &:active { background: #eef0f3; }
+
+    .emp {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ion-color-primary);
+      background: #eef0f3;
+      border-radius: 6px;
+      padding: 4px 5px;
+      text-align: center;
+      line-height: 1.15;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ben {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+      b {
+        font-size: 14px;
+        font-weight: 600;
+        color: #29313d;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .cpt {
+        font-size: 12px;
+        color: #6b7280;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .venc {
+        font-size: 11px;
+        color: #9aa0ab;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        ion-icon { font-size: 12px; }
+        .clip { color: var(--ion-color-success); font-size: 13px; margin-left: 4px; }
+      }
+    }
+
+    .val {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #29313d;
+      white-space: nowrap;
+      ion-icon { font-size: 16px; color: var(--ion-color-medium); }
+    }
   }
+}
+
+.count {
+  text-align: center;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--ion-color-medium);
 }

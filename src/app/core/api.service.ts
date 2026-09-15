@@ -13,6 +13,17 @@ import {
   Retenciones,
 } from './models';
 
+export interface ResumenCxp {
+  total: number;
+  pendiente: number;
+  revisado: number;
+  aprobado: number;
+  en_pago: number;
+  ejecutado: number;
+  negado: number;
+  proyectado: number;
+}
+
 /** Desenvuelve respuestas que pueden venir como `{data}` o crudas. */
 function unwrap<T>(r: unknown): T {
   if (r && typeof r === 'object' && 'data' in (r as Record<string, unknown>)) {
@@ -86,6 +97,32 @@ export class ApiService {
     return this.http
       .get<unknown>(`${this.base}/company`)
       .pipe(map((r) => unwrap<Empresa[]>(r) ?? []));
+  }
+
+  /** Consolidado de montos por estado (para el resumen fijo de la bandeja). */
+  getResumen(empresaId?: number | string | null): Observable<ResumenCxp> {
+    let httpParams = new HttpParams();
+    if (empresaId !== undefined && empresaId !== null && empresaId !== '') {
+      httpParams = httpParams.set('empresa_id', String(empresaId));
+    }
+    return this.http
+      .get<Record<string, unknown>>(`${this.base}/cxp/resumen`, { params: httpParams })
+      .pipe(
+        map((r) => {
+          const o = unwrap<Record<string, unknown>>(r) ?? {};
+          const n = (v: unknown) => Number(v ?? 0) || 0;
+          return {
+            total: n(o['total']),
+            pendiente: n(o['pendiente']),
+            revisado: n(o['revisado']),
+            aprobado: n(o['aprobado']),
+            en_pago: n(o['en_pago']),
+            ejecutado: n(o['ejecutado']),
+            negado: n(o['negado']),
+            proyectado: n(o['proyectado']),
+          } as ResumenCxp;
+        }),
+      );
   }
 
   /** Construye la URL absoluta de un soporte (relativo o absoluto). */

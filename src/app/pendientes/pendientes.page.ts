@@ -10,11 +10,6 @@ import {
   IonSegment,
   IonSegmentButton,
   IonLabel,
-  IonList,
-  IonCard,
-  IonCardContent,
-  IonBadge,
-  IonChip,
   IonIcon,
   IonSpinner,
   IonRefresher,
@@ -23,13 +18,12 @@ import {
 import { addIcons } from 'ionicons';
 import {
   attachOutline,
-  businessOutline,
   calendarOutline,
   chevronForwardOutline,
   fileTrayOutline,
 } from 'ionicons/icons';
 import type { RefresherCustomEvent } from '@ionic/angular';
-import { ApiService } from '../core/api.service';
+import { ApiService, ResumenCxp } from '../core/api.service';
 import { Cuenta } from '../core/models';
 import { formatCOP, formatDate } from '../core/format';
 
@@ -47,11 +41,6 @@ import { formatCOP, formatDate } from '../core/format';
     IonSegment,
     IonSegmentButton,
     IonLabel,
-    IonList,
-    IonCard,
-    IonCardContent,
-    IonBadge,
-    IonChip,
     IonIcon,
     IonSpinner,
     IonRefresher,
@@ -66,6 +55,7 @@ export class PendientesPage {
   readonly cuentas = signal<Cuenta[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly resumen = signal<ResumenCxp | null>(null);
 
   readonly cop = formatCOP;
   readonly fecha = formatDate;
@@ -73,7 +63,6 @@ export class PendientesPage {
   constructor() {
     addIcons({
       attachOutline,
-      businessOutline,
       calendarOutline,
       chevronForwardOutline,
       fileTrayOutline,
@@ -82,6 +71,7 @@ export class PendientesPage {
 
   ionViewWillEnter(): void {
     this.cargar();
+    this.cargarResumen();
   }
 
   onSegment(value: string): void {
@@ -105,6 +95,14 @@ export class PendientesPage {
         event?.target.complete();
       },
     });
+    if (event) this.cargarResumen();
+  }
+
+  cargarResumen(): void {
+    this.api.getResumen().subscribe({
+      next: (r) => this.resumen.set(r),
+      error: () => {},
+    });
   }
 
   abrir(cuenta: Cuenta): void {
@@ -114,5 +112,14 @@ export class PendientesPage {
 
   tieneSoporte(c: Cuenta): boolean {
     return c.tiene_soporte === true || c.tiene_soporte === 1;
+  }
+
+  /** Monto compacto para las tarjetas del resumen: $4.0M, $850K, $1.2MM. */
+  compact(v: number | null | undefined): string {
+    const n = Number(v ?? 0) || 0;
+    if (n >= 1_000_000_000) return '$' + (n / 1_000_000_000).toFixed(1) + 'MM';
+    if (n >= 1_000_000) return '$' + (n / 1_000_000).toFixed(1) + 'M';
+    if (n >= 1_000) return '$' + Math.round(n / 1_000) + 'K';
+    return '$' + n;
   }
 }

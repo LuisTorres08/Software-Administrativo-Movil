@@ -31,7 +31,7 @@ import { ApiService } from '../core/api.service';
 import { DashboardPagos, Empresa } from '../core/models';
 import { formatCOP, toNumber } from '../core/format';
 
-const PALETTE = ['#6d5bd6', '#3dc2ff', '#2dd36f', '#ffc409', '#eb445a', '#5260ff', '#92949c', '#ff6d3d'];
+const PALETTE = ['#4b5563', '#3dc2ff', '#2dd36f', '#ffc409', '#eb445a', '#64748b', '#92949c', '#ff6d3d'];
 
 @Component({
   selector: 'app-informes',
