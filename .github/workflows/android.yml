@@ -27,8 +27,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # ubuntu-latest ya trae el Android SDK; este paso solo refuerza/actualiza.
+      # Si falla (intermitente), continuamos con el SDK pre-instalado del runner.
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        continue-on-error: true
 
       - name: Install dependencies
         run: npm install --no-audit --no-fund
