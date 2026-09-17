@@ -1,30 +1,42 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Pendientes CxP</ion-title>
-  </ion-toolbar>
+<ion-header class="app-header">
+  <div class="hero">
+    <div class="topline">
+      <div class="tt">
+        <h1>Pendientes</h1>
+        @if (nombre) { <span class="hi">Hola, {{ nombre }}</span> }
+      </div>
+    </div>
 
-  <!-- Resumen consolidado (fijo) -->
-  <div class="resumen">
-    <div class="tile">
-      <span class="lbl">Por revisar</span>
-      <span class="val">{{ compact(resumen()?.pendiente) }}</span>
+    <div class="kpis">
+      <app-kpi-card tone="header" [label]="'Por revisar'" [value]="resumen()?.pendiente || 0"
+        (click)="filtro.set('PENDIENTE')" role="button"></app-kpi-card>
+      <app-kpi-card tone="header" accent="accent" [label]="'Por aprobar'" [value]="resumen()?.revisado || 0"
+        (click)="filtro.set('REVISADO')" role="button"></app-kpi-card>
+      <app-kpi-card tone="header" accent="success" [label]="'Aprobado'" [value]="resumen()?.aprobado || 0"></app-kpi-card>
     </div>
-    <div class="tile hl">
-      <span class="lbl">Por aprobar</span>
-      <span class="val">{{ compact(resumen()?.revisado) }}</span>
-    </div>
-    <div class="tile ok">
-      <span class="lbl">Aprobado</span>
-      <span class="val">{{ compact(resumen()?.aprobado) }}</span>
-    </div>
-  </div>
 
-  <ion-toolbar color="primary">
-    <ion-segment [value]="filtro()" (ionChange)="onSegment($any($event).detail.value)">
-      <ion-segment-button value="PENDIENTE"><ion-label>Por revisar</ion-label></ion-segment-button>
-      <ion-segment-button value="REVISADO"><ion-label>Por aprobar</ion-label></ion-segment-button>
+    @if (banner().mostrar) {
+      <button class="banner" (click)="aplicarBanner()" type="button">
+        <ion-icon name="warning-outline"></ion-icon>
+        <span class="txt tnum">
+          @if (banner().vencidas) { <b>{{ banner().vencidas }}</b> vencidas }
+          @if (banner().vencidas && banner().hoy) { · }
+          @if (banner().hoy) { <b>{{ banner().hoy }}</b> vencen hoy }
+          · {{ cop(banner().total) }}
+        </span>
+        <ion-icon name="chevron-forward-outline" class="go"></ion-icon>
+      </button>
+    }
+
+    <ion-segment class="seg" [value]="filtro()" (ionChange)="onSegment($any($event).detail.value)">
+      <ion-segment-button value="PENDIENTE">
+        <ion-label>Por revisar <span class="cnt tnum">{{ countPend() }}</span></ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="REVISADO">
+        <ion-label>Por aprobar <span class="cnt tnum">{{ countRev() }}</span></ion-label>
+      </ion-segment-button>
     </ion-segment>
-  </ion-toolbar>
+  </div>
 </ion-header>
 
 <ion-content [fullscreen]="true">
@@ -32,89 +44,107 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
-  <!-- Filtros: empresa + orden -->
+  <!-- Filtros -->
   <div class="filtros">
-    <div class="f">
-      <ion-icon name="business-outline"></ion-icon>
-      <ion-select
-        [value]="empresaFiltro()"
-        (ionChange)="empresaFiltro.set($any($event).detail.value)"
-        interface="popover"
-        placeholder="Todas las empresas"
-      >
-        <ion-select-option value="">Todas las empresas</ion-select-option>
-        @for (e of empresas(); track e) {
-          <ion-select-option [value]="e">{{ e }}</ion-select-option>
-        }
-      </ion-select>
+    <div class="chips">
+      <app-filter-chip [label]="'Todas'" [active]="chips().length === 0" (toggle)="chips.set([])"></app-filter-chip>
+      <app-filter-chip [label]="'Vencidas'" color="danger" [count]="chipCounts().vencida" [active]="chipActivo('vencida')" (toggle)="toggleChip('vencida')"></app-filter-chip>
+      <app-filter-chip [label]="'Hoy'" color="warning" [count]="chipCounts().hoy" [active]="chipActivo('hoy')" (toggle)="toggleChip('hoy')"></app-filter-chip>
+      <app-filter-chip [label]="'Por vencer'" [count]="chipCounts().pronto" [active]="chipActivo('pronto')" (toggle)="toggleChip('pronto')"></app-filter-chip>
+      <app-filter-chip [label]="'Esta semana'" [count]="chipCounts().semana" [active]="chipActivo('semana')" (toggle)="toggleChip('semana')"></app-filter-chip>
     </div>
-    <div class="f">
-      <ion-icon name="swap-vertical-outline"></ion-icon>
-      <ion-select
-        [value]="orden()"
-        (ionChange)="orden.set($any($event).detail.value)"
-        interface="popover"
-      >
-        <ion-select-option value="prioridad">Prioridad</ion-select-option>
-        <ion-select-option value="empresa">Empresa</ion-select-option>
-      </ion-select>
+    <div class="selects">
+      <div class="sel">
+        <ion-icon name="business-outline"></ion-icon>
+        <ion-select [value]="empresaFiltro()" (ionChange)="empresaFiltro.set($any($event).detail.value)"
+          interface="popover" placeholder="Todas las empresas" aria-label="Empresa">
+          <ion-select-option value="">Todas las empresas</ion-select-option>
+          @for (e of empresas(); track e) { <ion-select-option [value]="e">{{ e }}</ion-select-option> }
+        </ion-select>
+      </div>
+      <div class="sel">
+        <ion-icon name="swap-vertical-outline"></ion-icon>
+        <ion-select [value]="orden()" (ionChange)="orden.set($any($event).detail.value)" interface="popover" aria-label="Orden">
+          <ion-select-option value="prioridad">Prioridad</ion-select-option>
+          <ion-select-option value="empresa">Empresa</ion-select-option>
+          <ion-select-option value="valor">Valor</ion-select-option>
+          @if (tieneReciente()) { <ion-select-option value="reciente">Más recientes</ion-select-option> }
+        </ion-select>
+      </div>
+      @if (hayFiltros()) {
+        <button class="limpiar" (click)="limpiarFiltros()" type="button">
+          <ion-icon name="close-circle-outline"></ion-icon> Limpiar
+        </button>
+      }
     </div>
   </div>
 
   @if (loading()) {
-    <div class="center"><ion-spinner name="crescent"></ion-spinner></div>
+    <div class="tabla">
+      <div class="thead"><span>Empresa</span><span>Beneficiario / Concepto</span><span class="r">Valor</span></div>
+      @for (s of skeletons; track $index) {
+        <div class="fila sk-row">
+          <span class="stripe"></span>
+          <app-skeleton w="52px" h="20px"></app-skeleton>
+          <div class="mid"><app-skeleton w="70%" h="14px"></app-skeleton><app-skeleton w="45%" h="11px"></app-skeleton></div>
+          <app-skeleton w="60px" h="14px"></app-skeleton>
+          <app-skeleton w="24px" h="24px" radius="var(--r-8)"></app-skeleton>
+        </div>
+      }
+    </div>
   } @else if (error()) {
-    <div class="center empty">
-      <ion-icon name="file-tray-outline"></ion-icon>
-      <p>{{ error() }}</p>
-    </div>
-  } @else if (total() === 0) {
-    <div class="center empty">
-      <ion-icon name="file-tray-outline"></ion-icon>
-      <p>No hay cuentas {{ filtro() === 'PENDIENTE' ? 'por revisar' : 'por aprobar' }}@if (empresaFiltro()) { para esta empresa}.</p>
-    </div>
+    <app-empty-state icon="alert-circle-outline" [title]="'No se pudo cargar'" [message]="error()!">
+      <button class="btn-accent" (click)="cargar()">Reintentar</button>
+    </app-empty-state>
+  } @else if (cuentasSegmento().length === 0) {
+    <app-empty-state icon="checkmark-done-circle-outline"
+      [title]="'Todo al día'"
+      [message]="filtro() === 'PENDIENTE' ? 'No hay cuentas por revisar.' : 'No hay cuentas por aprobar.'"></app-empty-state>
+  } @else if (footerCount() === 0) {
+    <app-empty-state icon="funnel-outline" [title]="'Sin resultados'" [message]="'Ningún registro coincide con los filtros.'">
+      <button class="btn-accent" (click)="limpiarFiltros()">Limpiar filtros</button>
+    </app-empty-state>
   } @else {
-    <div class="lista">
-      @for (g of secciones(); track g.empresa) {
-        @if (g.empresa) {
-          <div class="grupo-head">
-            <ion-icon name="business-outline"></ion-icon> {{ g.empresa }}
-            <span class="n">{{ g.items.length }}</span>
-          </div>
+    <div class="tabla">
+      <div class="thead">
+        <span class="c-emp">Empresa</span>
+        <span class="c-ben">Beneficiario / Concepto</span>
+        <span class="c-ven">Vence</span>
+        <span class="c-val r">Valor</span>
+        <span class="c-sop">Sop.</span>
+      </div>
+
+      @for (s of secciones(); track s.key) {
+        @if (s.header) {
+          <app-group-header [title]="s.titulo" [count]="s.items.length" [total]="s.total" [color]="s.color"></app-group-header>
         }
-        @for (c of g.items; track c.id) {
-          @let u = urgencia(c);
-          <button class="item" (click)="abrir(c)">
-            <span class="stripe" [class]="u.cls"></span>
-            <div class="body">
-              <div class="l1">
-                <span class="emp">{{ c.empresa_abreviatura || c.empresa }}</span>
-                <span class="urg" [class]="u.cls">
-                  <ion-icon [name]="u.cls === 'vencida' || u.cls === 'hoy' ? 'alert-circle' : 'time-outline'"></ion-icon>
-                  {{ u.label }}
-                </span>
-              </div>
-              <div class="ben">{{ c.beneficiario || 'Sin beneficiario' }}</div>
-              @if (c.concepto) { <div class="cpt">{{ c.concepto }}</div> }
-              <div class="l3">
-                <span class="fecha"><ion-icon name="calendar-outline"></ion-icon> {{ fecha(c.fecha_vencimiento) }}</span>
-                <span class="val">{{ cop(c.valor_solicitado) }}</span>
-              </div>
-              <div class="l4">
-                @if (tieneSoporte(c)) {
-                  <button class="soporte" (click)="verSoporte(c, $event)">
-                    <ion-icon name="document-attach-outline"></ion-icon> Ver soporte
-                  </button>
-                } @else {
-                  <span class="sin-soporte">Sin soporte</span>
-                }
-                <span class="ver">Detalle <ion-icon name="chevron-forward-outline"></ion-icon></span>
-              </div>
-            </div>
+        @for (c of s.items; track c.id) {
+          <button class="fila" (click)="abrir(c)" type="button">
+            <span class="stripe" [attr.data-c]="urgKey(dias(c.fecha_vencimiento))"></span>
+            <span class="c-emp"><app-empresa-badge [text]="c.empresa_abreviatura || c.empresa || ''"></app-empresa-badge></span>
+            <span class="c-ben mid">
+              <b>{{ c.beneficiario || 'Sin beneficiario' }}</b>
+              <small>{{ c.concepto }}</small>
+            </span>
+            <span class="c-ven ven">
+              <span class="d tnum">{{ fecha(c.fecha_vencimiento) }}</span>
+              <app-urgency-badge [cls]="urgKey(dias(c.fecha_vencimiento))" [label]="urgLabel(c)"></app-urgency-badge>
+            </span>
+            <span class="c-val val tnum">{{ cop(c.valor_solicitado) }}</span>
+            <span class="c-sop">
+              @if (tieneSoporte(c)) {
+                <button class="sop on" (click)="verSoporte(c, $event)" type="button" aria-label="Ver soporte">
+                  <ion-icon name="document-attach-outline"></ion-icon>
+                </button>
+              } @else {
+                <span class="sop off" aria-label="Sin soporte"><ion-icon name="document-outline"></ion-icon></span>
+              }
+            </span>
           </button>
         }
       }
     </div>
-    <div class="count">{{ total() }} cuenta(s) {{ filtro() === 'PENDIENTE' ? 'por revisar' : 'por aprobar' }}</div>
+
+    <div class="footer tnum">{{ footerCount() }} cuentas · {{ cop(footerTotal()) }}</div>
   }
 </ion-content>

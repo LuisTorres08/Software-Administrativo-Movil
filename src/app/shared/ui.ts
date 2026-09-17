@@ -23,7 +23,7 @@ import {
       @if (total()) { <span class="tot tnum">{{ money(total()) }}</span> }
     </div>`,
   styles: [`
-    .gh{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:var(--sp-8);
+    .gh{position:sticky;top:var(--gh-top,0);z-index:5;display:flex;align-items:center;gap:var(--sp-8);
       padding:var(--sp-8) var(--sp-16);background:var(--surface-2);border-bottom:1px solid var(--border);
       backdrop-filter:saturate(1.1)}
     .bar{width:3px;height:14px;border-radius:var(--r-pill);background:var(--u-none)}
