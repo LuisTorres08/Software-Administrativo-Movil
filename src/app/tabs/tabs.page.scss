@@ -1,1 +1,47 @@
+// Barra de pestañas — refuerza el estilo global con tokens.
+// Fondo superficie, activo con acento, inactivo legible (--text-3),
+// respeta safe-area y se adelgaza en horizontal.
+ion-tab-bar {
+  --background: var(--surface);
+  --color: var(--text-3);
+  --color-selected: var(--accent);
+  --border: 0;
+  border-top: 1px solid var(--border);
+  min-height: 56px;
+  padding-top: var(--sp-4);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
 
+ion-tab-button {
+  --color: var(--text-3);
+  --color-selected: var(--accent);
+  --ripple-color: var(--accent);
+  --padding-top: var(--sp-4);
+  --padding-bottom: var(--sp-4);
+  font-weight: var(--fw-medium);
+
+  ion-icon {
+    font-size: 23px;
+    transition: transform var(--dur-fast) var(--ease);
+  }
+
+  ion-label {
+    font-size: var(--fs-12);
+    margin-top: 2px;
+    letter-spacing: 0.1px;
+  }
+
+  &.tab-selected {
+    font-weight: var(--fw-semibold);
+    ion-icon { transform: translateY(-1px); }
+    ion-label { font-weight: var(--fw-semibold); }
+  }
+}
+
+// Horizontal: barra más delgada
+@media (orientation: landscape) {
+  ion-tab-bar { min-height: 46px; }
+  ion-tab-button ion-icon { font-size: 20px; }
+}

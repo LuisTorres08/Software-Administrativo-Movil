@@ -1,33 +1,45 @@
-<ion-header>
-  <ion-toolbar color="primary">
+<ion-header class="app-header">
+  <ion-toolbar class="grafito-toolbar">
     <ion-title>Perfil</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <div class="avatar-wrap">
-    <div class="avatar">{{ iniciales }}</div>
-    <h2>{{ nombre || usuario }}</h2>
-    <p>Revisor CxP</p>
-  </div>
+<ion-content [fullscreen]="true">
+  <div class="wrap">
+    <section class="user-card animate-in">
+      <div class="avatar" aria-hidden="true">{{ iniciales }}</div>
+      <h2>{{ nombre || usuario }}</h2>
+      <span class="role">
+        <ion-icon name="shield-checkmark-outline" aria-hidden="true"></ion-icon>
+        Revisor CxP
+      </span>
+    </section>
 
-  <ion-card>
-    <ion-card-content>
-      <ion-item lines="full">
-        <ion-icon slot="start" name="person-outline" color="primary"></ion-icon>
-        <ion-label><p>Usuario</p><h3>{{ usuario || '—' }}</h3></ion-label>
-      </ion-item>
+    <section class="info-card animate-in">
+      <div class="row">
+        <span class="ico"><ion-icon name="person-outline" aria-hidden="true"></ion-icon></span>
+        <div class="rt">
+          <span class="lbl">Usuario</span>
+          <span class="val">{{ usuario || '—' }}</span>
+        </div>
+      </div>
+
       @if (email) {
-        <ion-item lines="none">
-          <ion-icon slot="start" name="at-outline" color="primary"></ion-icon>
-          <ion-label><p>Correo</p><h3>{{ email }}</h3></ion-label>
-        </ion-item>
+        <div class="row">
+          <span class="ico"><ion-icon name="at-outline" aria-hidden="true"></ion-icon></span>
+          <div class="rt">
+            <span class="lbl">Correo</span>
+            <span class="val">{{ email }}</span>
+          </div>
+        </div>
       }
-    </ion-card-content>
-  </ion-card>
+    </section>
 
-  <ion-button expand="block" color="danger" fill="outline" class="logout" (click)="logout()">
-    <ion-icon slot="start" name="log-out-outline"></ion-icon>
-    Cerrar sesión
-  </ion-button>
+    <button type="button" class="logout" (click)="confirmLogout()">
+      <ion-icon name="log-out-outline" aria-hidden="true"></ion-icon>
+      Cerrar sesión
+    </button>
+
+    <p class="version">Versión {{ version() }}</p>
+  </div>
 </ion-content>

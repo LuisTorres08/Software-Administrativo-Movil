@@ -7,12 +7,16 @@ import {
   IonInput,
   IonButton,
   IonSpinner,
-  IonItem,
   IonIcon,
-  IonNote,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { personOutline, lockClosedOutline, alertCircleOutline } from 'ionicons/icons';
+import {
+  personOutline,
+  lockClosedOutline,
+  alertCircleOutline,
+  eyeOutline,
+  eyeOffOutline,
+} from 'ionicons/icons';
 import { AuthService } from '../core/auth.service';
 
 @Component({
@@ -26,9 +30,7 @@ import { AuthService } from '../core/auth.service';
     IonInput,
     IonButton,
     IonSpinner,
-    IonItem,
     IonIcon,
-    IonNote,
   ],
 })
 export class LoginPage {
@@ -38,6 +40,7 @@ export class LoginPage {
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly showPass = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     usuario: ['', Validators.required],
@@ -45,7 +48,13 @@ export class LoginPage {
   });
 
   constructor() {
-    addIcons({ personOutline, lockClosedOutline, alertCircleOutline });
+    addIcons({
+      personOutline,
+      lockClosedOutline,
+      alertCircleOutline,
+      eyeOutline,
+      eyeOffOutline,
+    });
   }
 
   submit(): void {

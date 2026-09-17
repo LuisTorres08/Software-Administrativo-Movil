@@ -1,46 +1,59 @@
 <ion-content class="login-content" [fullscreen]="true">
+  <div class="glow" aria-hidden="true"></div>
+
   <div class="login-wrap">
-    <div class="brand">
+    <section class="brand">
       <div class="monogram">CxP</div>
       <h1>Revisor CxP</h1>
       <p>Cuentas por pagar en tu bolsillo</p>
-    </div>
+    </section>
 
-    <form class="login-card" [formGroup]="form" (ngSubmit)="submit()">
-      <ion-item lines="none" class="field">
-        <ion-icon slot="start" name="person-outline" aria-hidden="true"></ion-icon>
+    <form class="login-card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      @if (error()) {
+        <div class="error" role="alert">
+          <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <label class="field">
+        <ion-icon class="lead" name="person-outline" aria-hidden="true"></ion-icon>
         <ion-input
           label="Usuario"
           labelPlacement="floating"
           formControlName="usuario"
           autocomplete="username"
           type="text"
+          enterkeyhint="next"
         ></ion-input>
-      </ion-item>
+      </label>
 
-      <ion-item lines="none" class="field">
-        <ion-icon slot="start" name="lock-closed-outline" aria-hidden="true"></ion-icon>
+      <label class="field">
+        <ion-icon class="lead" name="lock-closed-outline" aria-hidden="true"></ion-icon>
         <ion-input
           label="Contraseña"
           labelPlacement="floating"
           formControlName="clave"
-          type="password"
+          [type]="showPass() ? 'text' : 'password'"
           autocomplete="current-password"
+          enterkeyhint="go"
         ></ion-input>
-      </ion-item>
-
-      @if (error()) {
-        <ion-note color="danger" class="error">
-          <ion-icon name="alert-circle-outline" aria-hidden="true"></ion-icon>
-          {{ error() }}
-        </ion-note>
-      }
+        <button
+          type="button"
+          class="toggle"
+          (click)="showPass.set(!showPass())"
+          [attr.aria-label]="showPass() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+        >
+          <ion-icon [name]="showPass() ? 'eye-off-outline' : 'eye-outline'" aria-hidden="true"></ion-icon>
+        </button>
+      </label>
 
       <ion-button expand="block" type="submit" [disabled]="loading()" class="submit">
         @if (loading()) {
           <ion-spinner name="crescent"></ion-spinner>
+          <span>Ingresando…</span>
         } @else {
-          Iniciar sesión
+          <span>Iniciar sesión</span>
         }
       </ion-button>
     </form>
