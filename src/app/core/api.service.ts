@@ -69,6 +69,16 @@ export class ApiService {
     });
   }
 
+  /** Cambio de estado masivo (solo REVISADO/APROBADO/EN_PAGO en el backend). */
+  cambioMasivoEstado(ids: number[], estado: string): Observable<{ actualizados: number; ids: number[] }> {
+    return this.http
+      .post<unknown>(`${this.base}/cxp/cambio-masivo-estado`, { ids, estado })
+      .pipe(map((r) => {
+        const d = unwrap<{ actualizados?: number; ids?: number[] }>(r) ?? {};
+        return { actualizados: Number(d.actualizados ?? 0), ids: d.ids ?? [] };
+      }));
+  }
+
   getRetenciones(id: number): Observable<Retenciones> {
     return this.http
       .get<unknown>(`${this.base}/cxp/cuentas/${id}/retenciones`)

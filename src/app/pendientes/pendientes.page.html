@@ -5,6 +5,17 @@
         <h1>Pendientes</h1>
         @if (nombre) { <span class="hi">Hola, {{ nombre }}</span> }
       </div>
+      <div class="hdr-actions">
+        @if (!seleccion()) {
+          <button class="hbtn" (click)="enterSeleccion()" type="button">
+            <ion-icon name="checkmark-done-outline"></ion-icon> Seleccionar
+          </button>
+        } @else {
+          <button class="hbtn" (click)="exitSeleccion()" type="button">
+            <ion-icon name="close-outline"></ion-icon> Cancelar
+          </button>
+        }
+      </div>
     </div>
 
     <div class="kpis">
@@ -15,7 +26,7 @@
       <app-kpi-card tone="header" accent="success" [label]="'Aprobado'" [value]="resumen()?.aprobado || 0"></app-kpi-card>
     </div>
 
-    @if (banner().mostrar) {
+    @if (banner().mostrar && !seleccion()) {
       <button class="banner" (click)="aplicarBanner()" type="button">
         <ion-icon name="warning-outline"></ion-icon>
         <span class="txt tnum">
@@ -81,7 +92,7 @@
 
   @if (loading()) {
     <div class="tabla">
-      <div class="thead"><span>Empresa</span><span>Beneficiario / Concepto</span><span class="r">Valor</span></div>
+      <div class="thead"><span class="c-emp">Empresa</span><span class="c-ben">Beneficiario / Concepto</span><span class="c-ven">Vence</span><span class="c-val r">Valor</span><span class="c-sop">Sop.</span></div>
       @for (s of skeletons; track $index) {
         <div class="fila sk-row">
           <span class="stripe"></span>
@@ -105,8 +116,11 @@
       <button class="btn-accent" (click)="limpiarFiltros()">Limpiar filtros</button>
     </app-empty-state>
   } @else {
-    <div class="tabla">
-      <div class="thead">
+    <div class="tabla" [class.selmode]="seleccion()">
+      <div class="thead" [class.sel]="seleccion()">
+        @if (seleccion()) {
+          <button class="rowck" [class.on]="allVisibleSel()" [class.mid]="someVisibleSel()" (click)="toggleTodos()" type="button" aria-label="Seleccionar todo"><span class="tk"></span></button>
+        }
         <span class="c-emp">Empresa</span>
         <span class="c-ben">Beneficiario / Concepto</span>
         <span class="c-ven">Vence</span>
@@ -116,11 +130,19 @@
 
       @for (s of secciones(); track s.key) {
         @if (s.header) {
-          <app-group-header [title]="s.titulo" [count]="s.items.length" [total]="s.total" [color]="s.color"></app-group-header>
+          <app-group-header [title]="s.titulo" [count]="s.items.length" [total]="s.total" [color]="s.color"
+            [selectable]="seleccion()" [checked]="grupoEstado(s.items) === 'all'" [indeterminate]="grupoEstado(s.items) === 'some'"
+            (toggle)="toggleGrupo(s.items)"></app-group-header>
         }
         @for (c of s.items; track c.id) {
-          <button class="fila" (click)="abrir(c)" type="button">
+          <button class="fila" [class.sel]="seleccion()" [class.on]="seleccion() && isSel(c.id)"
+            (click)="onRowClick(c)"
+            (pointerdown)="onPressStart(c)" (pointerup)="onPressEnd()" (pointerleave)="onPressEnd()" (pointercancel)="onPressEnd()"
+            type="button">
             <span class="stripe" [attr.data-c]="urgKey(dias(c.fecha_vencimiento))"></span>
+            @if (seleccion()) {
+              <span class="ckcell"><span class="rowck sm" [class.on]="isSel(c.id)"><span class="tk"></span></span></span>
+            }
             <span class="c-emp"><app-empresa-badge [text]="c.empresa_abreviatura || c.empresa || ''"></app-empresa-badge></span>
             <span class="c-ben mid">
               <b>{{ c.beneficiario || 'Sin beneficiario' }}</b>
@@ -145,6 +167,29 @@
       }
     </div>
 
-    <div class="footer tnum">{{ footerCount() }} cuentas · {{ cop(footerTotal()) }}</div>
+    @if (!seleccion()) {
+      <div class="footer tnum">{{ footerCount() }} cuentas · {{ cop(footerTotal()) }}</div>
+    } @else {
+      <div class="ab-spacer"></div>
+    }
+  }
+
+  @if (seleccion() && selCount() > 0) {
+    <app-action-bar>
+      <div class="selinfo">
+        <span class="c tnum">{{ selCount() }}</span>
+        <span class="t">seleccionadas · <span class="tnum">{{ cop(selTotal()) }}</span></span>
+      </div>
+      @if (procesando(); as p) {
+        <div class="proc tnum"><ion-spinner name="crescent"></ion-spinner> {{ p.done }}/{{ p.total }}</div>
+      } @else {
+        @if (filtro() === 'PENDIENTE') {
+          <button class="ab-btn ok" (click)="confirmarLote('REVISADO')" type="button">Marcar revisadas</button>
+        } @else {
+          <button class="ab-btn apr" (click)="confirmarLote('APROBADO')" type="button">Aprobar</button>
+        }
+        <button class="ab-btn no" (click)="confirmarLote('NEGADO')" type="button">Negar</button>
+      }
+    </app-action-bar>
   }
 </ion-content>
