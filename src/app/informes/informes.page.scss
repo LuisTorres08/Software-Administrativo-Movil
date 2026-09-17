@@ -1,88 +1,117 @@
-.center {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 16px;
+// ── Header grafito ──
+.app-header { --background: transparent; }
+.hero {
+  background: linear-gradient(140deg, var(--header-a) 0%, var(--header-b) 100%);
+  padding: calc(var(--sp-8) + env(safe-area-inset-top)) var(--sp-16) var(--sp-16);
+  padding-left: calc(var(--sp-16) + env(safe-area-inset-left));
+  padding-right: calc(var(--sp-16) + env(safe-area-inset-right));
+}
+.topline { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-8); }
+.tt {
+  display: flex; align-items: baseline; gap: var(--sp-8); flex-wrap: wrap; min-width: 0;
+  h1 { margin: 0; font-size: var(--fs-20); font-weight: var(--fw-bold); color: var(--on-header); }
+  .hi { font-size: var(--fs-13); color: var(--on-header-dim); }
+}
+.hicon {
+  flex: 0 0 auto; width: 40px; height: 40px; border-radius: var(--r-12);
+  display: flex; align-items: center; justify-content: center;
+  background: var(--header-tile); border: 1px solid var(--header-tile-border);
+  ion-icon { font-size: 22px; color: var(--on-header); }
 }
 
-.empty {
-  color: var(--ion-color-medium);
-  text-align: center;
-
-  ion-icon {
-    font-size: 52px;
-    margin-bottom: 10px;
-    opacity: 0.6;
-  }
-
-  p {
-    margin: 0;
-  }
+// ── KPIs ──
+.kpis {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--sp-8);
+  padding: var(--sp-16) var(--sp-16) var(--sp-8);
+  padding-left: calc(var(--sp-16) + env(safe-area-inset-left));
+  padding-right: calc(var(--sp-16) + env(safe-area-inset-right));
+  app-kpi-card { display: block; animation: fadeUp var(--dur) var(--ease) both; }
+}
+.kpi-sk {
+  display: flex; flex-direction: column; gap: var(--sp-8);
+  padding: var(--sp-12); border-radius: var(--r-12);
+  background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-1);
 }
 
+// ── Filtros ──
 .filtros {
-  border-radius: 16px;
-
-  .fechas {
-    display: flex;
-    gap: 8px;
-
-    ion-item {
-      flex: 1;
-    }
+  position: sticky; top: 0; z-index: 6;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+  padding: var(--sp-8) 0;
+}
+.chips {
+  display: flex; gap: var(--sp-8); overflow-x: auto;
+  padding: 0 var(--sp-16) var(--sp-8);
+  padding-left: calc(var(--sp-16) + env(safe-area-inset-left));
+  padding-right: calc(var(--sp-16) + env(safe-area-inset-right));
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+  app-filter-chip { flex: 0 0 auto; }
+}
+.controles {
+  display: flex; flex-wrap: wrap; gap: var(--sp-8); align-items: stretch;
+  padding: 0 var(--sp-16);
+  padding-left: calc(var(--sp-16) + env(safe-area-inset-left));
+  padding-right: calc(var(--sp-16) + env(safe-area-inset-right));
+}
+.sel {
+  flex: 1 1 160px; min-width: 0; display: flex; align-items: center; gap: var(--sp-4);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-8);
+  padding: 2px var(--sp-8); min-height: 38px;
+  ion-icon { color: var(--accent); font-size: 18px; flex: 0 0 auto; }
+  ion-select { flex: 1; min-width: 0; font-size: var(--fs-13); --padding-start: 2px; --padding-end: 2px; color: var(--text); }
+}
+.fechas { display: flex; gap: var(--sp-8); flex: 1 1 100%; }
+.fecha {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-8);
+  padding: var(--sp-4) var(--sp-8);
+  .fl { font-size: var(--fs-12); font-weight: var(--fw-medium); color: var(--text-3); }
+  .fi {
+    border: 0; background: transparent; color: var(--text);
+    font-family: var(--font); font-size: var(--fs-13); padding: 0; min-height: 22px; width: 100%;
+    &::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; filter: grayscale(1); }
+    &:focus { outline: none; }
   }
 }
-
-.kpi {
-  border-radius: 16px;
-  background: linear-gradient(135deg, #4b5563 0%, #2d3542 100%);
-  color: #fff;
-
-  ion-card-content {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .kpi-icon {
-    width: 54px;
-    height: 54px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.18);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    ion-icon {
-      font-size: 28px;
-    }
-  }
-
-  .kpi-label {
-    margin: 0;
-    font-size: 13px;
-    opacity: 0.85;
-  }
-
-  .kpi-value {
-    font-size: 24px;
-    font-weight: 700;
-  }
-
-  .kpi-sub {
-    margin: 2px 0 0;
-    font-size: 12px;
-    opacity: 0.85;
-  }
+.btn-actualizar {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-8);
+  min-height: 38px; padding: 0 var(--sp-16); border: 0; border-radius: var(--r-8);
+  background: var(--accent); color: var(--on-accent);
+  font-size: var(--fs-13); font-weight: var(--fw-semibold); cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+  ion-icon { font-size: 17px; }
+  &:active { background: var(--accent-strong); transform: scale(0.98); }
 }
 
-ion-card-title {
-  font-size: 16px;
+// ── Tarjetas de gráficos ──
+.charts {
+  display: flex; flex-direction: column; gap: var(--sp-12);
+  padding: var(--sp-12) var(--sp-16) var(--sp-24);
+  padding-left: calc(var(--sp-16) + env(safe-area-inset-left));
+  padding-right: calc(var(--sp-16) + env(safe-area-inset-right));
+}
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-16); box-shadow: var(--shadow-1);
+  padding: var(--sp-16);
+  animation: fadeUp var(--dur) var(--ease) both;
+}
+.card-h {
+  display: flex; align-items: center; gap: var(--sp-8); margin-bottom: var(--sp-12);
+  ion-icon { font-size: 18px; color: var(--accent); flex: 0 0 auto; }
+  h2 { margin: 0; font-size: var(--fs-15); font-weight: var(--fw-semibold); color: var(--text); }
+}
+.chart-box { position: relative; width: 100%; }
+.sk-card {
+  display: flex; flex-direction: column; gap: var(--sp-12);
 }
 
-.chart-box {
-  position: relative;
-  height: 260px;
-  width: 100%;
+// ── Horizontal: KPIs en una fila, gráficos en 2 columnas ──
+@media (orientation: landscape) {
+  .hero { padding-top: calc(var(--sp-4) + env(safe-area-inset-top)); padding-bottom: var(--sp-12); }
+  .kpis { grid-template-columns: repeat(3, 1fr); }
+  .charts {
+    display: grid; grid-template-columns: 1fr 1fr; align-items: start;
+  }
 }

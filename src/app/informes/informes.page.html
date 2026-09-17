@@ -1,118 +1,144 @@
-<ion-header>
-  <ion-toolbar color="primary">
-    <ion-title>Informes de pagos</ion-title>
-  </ion-toolbar>
+<ion-header class="app-header">
+  <div class="hero">
+    <div class="topline">
+      <div class="tt">
+        <h1>Informes</h1>
+        <span class="hi">Dashboards de pagos</span>
+      </div>
+      <div class="hicon"><ion-icon name="stats-chart-outline"></ion-icon></div>
+    </div>
+  </div>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <ion-card class="filtros">
-    <ion-card-content>
-      <ion-item lines="none">
-        <ion-select
-          label="Empresa"
-          labelPlacement="stacked"
-          interface="popover"
-          placeholder="Todas"
-          [(ngModel)]="empresaId"
-          (ionChange)="cargar()"
-        >
-          <ion-select-option [value]="''">Todas</ion-select-option>
+<ion-content [fullscreen]="true">
+  <!-- KPIs -->
+  <div class="kpis">
+    @if (loading()) {
+      @for (s of [1, 2, 3]; track s) {
+        <div class="kpi-sk">
+          <app-skeleton w="52%" h="11px"></app-skeleton>
+          <app-skeleton w="78%" h="22px"></app-skeleton>
+        </div>
+      }
+    } @else {
+      <app-kpi-card tone="card" accent="accent" [label]="'Total pagado'"
+        [value]="totalPagado()" format="cop"></app-kpi-card>
+      <app-kpi-card tone="card" [label]="'N.º de pagos'"
+        [value]="numPagos()" format="int"></app-kpi-card>
+      <app-kpi-card tone="card" accent="success" [label]="'Pago promedio'"
+        [value]="promedio()" format="cop"></app-kpi-card>
+    }
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <div class="chips">
+      <app-filter-chip [label]="'Este mes'" [active]="preset() === 'mes'" (toggle)="setPreset('mes')"></app-filter-chip>
+      <app-filter-chip [label]="'Mes anterior'" [active]="preset() === 'mesAnterior'" (toggle)="setPreset('mesAnterior')"></app-filter-chip>
+      <app-filter-chip [label]="'3 meses'" [active]="preset() === '3meses'" (toggle)="setPreset('3meses')"></app-filter-chip>
+      <app-filter-chip [label]="'Este año'" [active]="preset() === 'anio'" (toggle)="setPreset('anio')"></app-filter-chip>
+      <app-filter-chip [label]="'Personalizado'" [active]="preset() === 'custom'" (toggle)="setPreset('custom')"></app-filter-chip>
+    </div>
+
+    <div class="controles">
+      <div class="sel">
+        <ion-icon name="business-outline"></ion-icon>
+        <ion-select [value]="empresaId" (ionChange)="onEmpresaChange($any($event).detail.value)"
+          interface="popover" placeholder="Todas las empresas" aria-label="Empresa">
+          <ion-select-option [value]="''">Todas las empresas</ion-select-option>
           @for (e of empresas(); track e.id) {
             <ion-select-option [value]="e.id">{{ e.nombre }}</ion-select-option>
           }
         </ion-select>
-      </ion-item>
-      <div class="fechas">
-        <ion-item lines="none">
-          <ion-input
-            label="Desde"
-            labelPlacement="stacked"
-            type="date"
-            [(ngModel)]="desde"
-            (ionChange)="cargar()"
-          ></ion-input>
-        </ion-item>
-        <ion-item lines="none">
-          <ion-input
-            label="Hasta"
-            labelPlacement="stacked"
-            type="date"
-            [(ngModel)]="hasta"
-            (ionChange)="cargar()"
-          ></ion-input>
-        </ion-item>
       </div>
-      <ion-button expand="block" fill="clear" size="small" (click)="cargar()">
-        <ion-icon slot="start" name="refresh-outline"></ion-icon>
+
+      @if (preset() === 'custom') {
+        <div class="fechas">
+          <label class="fecha">
+            <span class="fl">Desde</span>
+            <input type="date" class="fi tnum" [(ngModel)]="desde" aria-label="Desde" />
+          </label>
+          <label class="fecha">
+            <span class="fl">Hasta</span>
+            <input type="date" class="fi tnum" [(ngModel)]="hasta" aria-label="Hasta" />
+          </label>
+        </div>
+      }
+
+      <button class="btn-actualizar" (click)="cargar()" type="button">
+        <ion-icon name="refresh-outline"></ion-icon>
         Actualizar
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
+      </button>
+    </div>
+  </div>
 
   @if (loading()) {
-    <div class="center"><ion-spinner name="crescent"></ion-spinner></div>
-  } @else if (error()) {
-    <div class="center empty">
-      <ion-icon name="bar-chart-outline"></ion-icon>
-      <p>{{ error() }}</p>
+    <div class="charts">
+      @for (s of [1, 2, 3, 4]; track s) {
+        <section class="card sk-card">
+          <app-skeleton w="42%" h="14px"></app-skeleton>
+          <app-skeleton w="100%" h="220px" radius="var(--r-12)"></app-skeleton>
+        </section>
+      }
     </div>
+  } @else if (error()) {
+    <app-empty-state icon="alert-circle-outline" [title]="'No se pudo cargar'" [message]="error()!">
+      <button class="btn-actualizar" (click)="cargar()" type="button">
+        <ion-icon name="refresh-outline"></ion-icon> Reintentar
+      </button>
+    </app-empty-state>
+  } @else if (sinDatos()) {
+    <app-empty-state icon="bar-chart-outline" [title]="'Sin datos de pagos'"
+      [message]="'Ningún pago coincide con los filtros seleccionados.'"></app-empty-state>
   } @else if (data()) {
-    <ion-card class="kpi">
-      <ion-card-content>
-        <div class="kpi-icon"><ion-icon name="cash-outline"></ion-icon></div>
-        <div>
-          <p class="kpi-label">Total pagado</p>
-          <div class="kpi-value">{{ cop(totalPagado) }}</div>
-          <p class="kpi-sub">{{ numPagos }} pagos</p>
-        </div>
-      </ion-card-content>
-    </ion-card>
+    <div class="charts">
+      @if (data()!.por_empresa.length) {
+        <section class="card">
+          <header class="card-h">
+            <ion-icon name="business-outline"></ion-icon>
+            <h2>Pagado por empresa</h2>
+          </header>
+          <div class="chart-box" [style.height.px]="hEmpresa()">
+            <canvas #empresaCanvas></canvas>
+          </div>
+        </section>
+      }
 
-    @if ((data()!.por_empresa).length) {
-      <ion-card>
-        <ion-card-header><ion-card-title>Pagado por empresa</ion-card-title></ion-card-header>
-        <ion-card-content>
-          <div class="chart-box"><canvas #empresaCanvas></canvas></div>
-        </ion-card-content>
-      </ion-card>
-    }
+      @if (data()!.por_empresa_mes.length) {
+        <section class="card">
+          <header class="card-h">
+            <ion-icon name="trending-up-outline"></ion-icon>
+            <h2>Evolución por empresa y mes</h2>
+          </header>
+          <div class="chart-box" [style.height.px]="hMes()">
+            <canvas #mesCanvas></canvas>
+          </div>
+        </section>
+      }
 
-    @if ((data()!.por_empresa_mes).length) {
-      <ion-card>
-        <ion-card-header><ion-card-title>Por empresa y mes</ion-card-title></ion-card-header>
-        <ion-card-content>
-          <div class="chart-box"><canvas #mesCanvas></canvas></div>
-        </ion-card-content>
-      </ion-card>
-    }
+      @if (data()!.por_proveedor.length) {
+        <section class="card">
+          <header class="card-h">
+            <ion-icon name="people-outline"></ion-icon>
+            <h2>Top proveedores</h2>
+          </header>
+          <div class="chart-box" [style.height.px]="hProv()">
+            <canvas #proveedorCanvas></canvas>
+          </div>
+        </section>
+      }
 
-    @if ((data()!.por_proveedor).length) {
-      <ion-card>
-        <ion-card-header><ion-card-title>Top proveedores</ion-card-title></ion-card-header>
-        <ion-card-content>
-          <div class="chart-box"><canvas #proveedorCanvas></canvas></div>
-        </ion-card-content>
-      </ion-card>
-    }
-
-    @if ((data()!.por_centro_costo).length) {
-      <ion-card>
-        <ion-card-header><ion-card-title>Por centro de costo</ion-card-title></ion-card-header>
-        <ion-card-content>
-          <div class="chart-box"><canvas #centroCanvas></canvas></div>
-        </ion-card-content>
-      </ion-card>
-    }
-
-    @if (
-      !(data()!.por_empresa).length &&
-      !(data()!.por_proveedor).length &&
-      !(data()!.por_centro_costo).length
-    ) {
-      <div class="center empty">
-        <ion-icon name="bar-chart-outline"></ion-icon>
-        <p>No hay datos de pagos para los filtros seleccionados.</p>
-      </div>
-    }
+      @if (data()!.por_centro_costo.length) {
+        <section class="card">
+          <header class="card-h">
+            <ion-icon name="pie-chart-outline"></ion-icon>
+            <h2>Por centro de costo</h2>
+          </header>
+          <div class="chart-box" [style.height.px]="hCentro()">
+            <canvas #centroCanvas></canvas>
+          </div>
+        </section>
+      }
+    </div>
   }
 </ion-content>
