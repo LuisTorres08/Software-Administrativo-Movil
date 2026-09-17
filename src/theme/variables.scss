@@ -1,68 +1,217 @@
-// Revisor CxP — tema empresarial (plomo / grafito)
-// Documentación de theming: https://ionicframework.com/docs/theming/
+// =============================================================================
+//  Revisor CxP — Sistema de diseño (tokens)
+//  Marca grafito/plomo + acento azul. Todo el color/tamaño/espaciado/radio/
+//  sombra de la app sale de estas variables. Claro y oscuro (tema del sistema).
+//  Documentado en DISENO.md
+// =============================================================================
 
 :root {
-  /** primary — plomo grafito **/
-  --ion-color-primary: #4b5563;
-  --ion-color-primary-rgb: 75, 85, 99;
-  --ion-color-primary-contrast: #ffffff;
+  // ── Marca (grafito / plomo) ───────────────────────────────────────────────
+  --grafito-900: #0f1115;
+  --grafito-800: #171a21;
+  --grafito-700: #1e222b;
+  --grafito-600: #2d3542;
+  --grafito-500: #3b4553;
+  --grafito-400: #4b5563;
+  --grafito-300: #64748b;
+  --grafito-200: #94a3b8;
+
+  // ── Acento interactivo (azul) ─────────────────────────────────────────────
+  --accent: #2563eb;
+  --accent-rgb: 37, 99, 235;
+  --accent-strong: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.10);
+  --on-accent: #ffffff;
+
+  // ── Semánticos ────────────────────────────────────────────────────────────
+  --success: #16a34a;         --success-rgb: 22, 163, 74;   --success-soft: rgba(22, 163, 74, 0.12);
+  --danger:  #dc2626;         --danger-rgb: 220, 38, 38;    --danger-soft:  rgba(220, 38, 38, 0.10);
+  --warning: #d97706;         --warning-rgb: 217, 119, 6;   --warning-soft: rgba(217, 119, 6, 0.12);
+
+  // ── Urgencia por vencimiento ──────────────────────────────────────────────
+  --u-vencida: #dc2626;  --u-vencida-soft: rgba(220, 38, 38, 0.10);
+  --u-hoy:     #ea580c;  --u-hoy-soft:     rgba(234, 88, 12, 0.12);
+  --u-pronto:  #d97706;  --u-pronto-soft:  rgba(217, 119, 6, 0.12);
+  --u-semana:  #ca8a04;  --u-semana-soft:  rgba(202, 138, 4, 0.13);
+  --u-ok:      #16a34a;  --u-ok-soft:      rgba(22, 163, 74, 0.12);
+  --u-none:    #94a3b8;  --u-none-soft:    rgba(148, 163, 184, 0.14);
+
+  // ── Superficies (modo claro) ──────────────────────────────────────────────
+  --bg:            #eef1f5;
+  --surface:       #ffffff;
+  --surface-2:     #f7f9fc;
+  --surface-elev:  #ffffff;
+  --surface-sunken:#e9edf2;
+  --border:        rgba(17, 24, 39, 0.08);
+  --border-strong: rgba(17, 24, 39, 0.14);
+  --overlay:       rgba(15, 17, 21, 0.45);
+  --pressed:       rgba(17, 24, 39, 0.05);
+
+  // Header grafito (degradado sutil)
+  --header-a: #2d3542;
+  --header-b: #1c212b;
+  --on-header: #ffffff;
+  --on-header-dim: rgba(255, 255, 255, 0.66);
+  --header-tile: rgba(255, 255, 255, 0.10);
+  --header-tile-border: rgba(255, 255, 255, 0.14);
+
+  // ── Texto ─────────────────────────────────────────────────────────────────
+  --text:   #111827;
+  --text-2: #4b5563;
+  --text-3: #6b7280;
+  --text-muted: #9ca3af;
+
+  // ── Tipografía ────────────────────────────────────────────────────────────
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-15: 15px;
+  --fs-17: 17px;
+  --fs-20: 20px;
+  --fs-28: 28px;
+  --fs-34: 34px;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  // ── Espaciado / radio / sombra / movimiento ───────────────────────────────
+  --sp-4: 4px;  --sp-8: 8px;  --sp-12: 12px;  --sp-16: 16px;  --sp-24: 24px;  --sp-32: 32px;
+  --r-8: 8px;   --r-12: 12px;  --r-16: 16px;  --r-pill: 999px;
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --shadow-2: 0 6px 16px rgba(16, 24, 40, 0.12);
+  --dur: 200ms;
+  --dur-fast: 150ms;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+
+  // ── Paleta de gráficos (viva, distinguible en claro/oscuro) ───────────────
+  --chart-1: #2563eb;
+  --chart-2: #0ea5e9;
+  --chart-3: #16a34a;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+  --chart-6: #8b5cf6;
+  --chart-7: #14b8a6;
+  --chart-8: #ec4899;
+  --chart-grid: rgba(17, 24, 39, 0.08);
+  --chart-text: #6b7280;
+
+  // ── Mapeo a variables de Ionic ────────────────────────────────────────────
+  --ion-font-family: var(--font);
+  --ion-background-color: var(--bg);
+  --ion-background-color-rgb: 238, 241, 245;
+  --ion-text-color: var(--text);
+  --ion-text-color-rgb: 17, 24, 39;
+  --ion-border-color: var(--border);
+  --ion-item-background: var(--surface);
+  --ion-toolbar-background: var(--surface);
+  --ion-toolbar-color: var(--text);
+  --ion-card-background: var(--surface);
+  --ion-tab-bar-background: var(--surface);
+  --ion-tab-bar-color: var(--text-3);
+  --ion-tab-bar-color-selected: var(--accent);
+
+  --ion-color-primary: var(--accent);
+  --ion-color-primary-rgb: var(--accent-rgb);
+  --ion-color-primary-contrast: var(--on-accent);
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #424a57;
-  --ion-color-primary-tint: #5d6572;
+  --ion-color-primary-shade: var(--accent-strong);
+  --ion-color-primary-tint: #3b76ee;
 
-  /** secondary — plomo medio **/
-  --ion-color-secondary: #6b7280;
-  --ion-color-secondary-rgb: 107, 114, 128;
-  --ion-color-secondary-contrast: #ffffff;
-  --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #5e6470;
-  --ion-color-secondary-tint: #7a808d;
-
-  /** tertiary — plomo claro **/
-  --ion-color-tertiary: #64748b;
-  --ion-color-tertiary-rgb: 100, 116, 139;
-  --ion-color-tertiary-contrast: #ffffff;
-  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #58667a;
-  --ion-color-tertiary-tint: #748196;
-
-  /** success **/
-  --ion-color-success: #2dd36f;
-  --ion-color-success-rgb: 45, 211, 111;
+  --ion-color-success: var(--success);
+  --ion-color-success-rgb: var(--success-rgb);
   --ion-color-success-contrast: #ffffff;
-  --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #28ba62;
-  --ion-color-success-tint: #42d77d;
+  --ion-color-success-shade: #128a3f;
+  --ion-color-success-tint: #2eb35d;
 
-  /** warning **/
-  --ion-color-warning: #ffc409;
-  --ion-color-warning-rgb: 255, 196, 9;
-  --ion-color-warning-contrast: #000000;
-  --ion-color-warning-contrast-rgb: 0, 0, 0;
-  --ion-color-warning-shade: #e0ac08;
-  --ion-color-warning-tint: #ffca22;
-
-  /** danger **/
-  --ion-color-danger: #eb445a;
-  --ion-color-danger-rgb: 235, 68, 90;
+  --ion-color-danger: var(--danger);
+  --ion-color-danger-rgb: var(--danger-rgb);
   --ion-color-danger-contrast: #ffffff;
-  --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #cf3c4f;
-  --ion-color-danger-tint: #ed576b;
+  --ion-color-danger-shade: #c01f1f;
+  --ion-color-danger-tint: #e03b3b;
 
-  /** medium **/
-  --ion-color-medium: #92949c;
-  --ion-color-medium-rgb: 146, 148, 156;
-  --ion-color-medium-contrast: #ffffff;
-  --ion-color-medium-contrast-rgb: 255, 255, 255;
-  --ion-color-medium-shade: #808289;
-  --ion-color-medium-tint: #9d9fa6;
+  --ion-color-warning: var(--warning);
+  --ion-color-warning-rgb: var(--warning-rgb);
+  --ion-color-warning-contrast: #ffffff;
+  --ion-color-warning-shade: #bf6905;
+  --ion-color-warning-tint: #e08519;
+}
 
-  /** light **/
-  --ion-color-light: #f4f5f8;
-  --ion-color-light-rgb: 244, 245, 248;
-  --ion-color-light-contrast: #000000;
-  --ion-color-light-contrast-rgb: 0, 0, 0;
-  --ion-color-light-shade: #d7d8da;
-  --ion-color-light-tint: #f5f6f9;
+// =============================================================================
+//  Modo oscuro (sigue el tema del sistema)
+// =============================================================================
+@media (prefers-color-scheme: dark) {
+  :root {
+    // Acento (más claro para contraste sobre superficies oscuras)
+    --accent: #60a5fa;
+    --accent-rgb: 96, 165, 250;
+    --accent-strong: #3b82f6;
+    --accent-soft: rgba(96, 165, 250, 0.14);
+    --on-accent: #0b1220;
+
+    --success: #22c55e; --success-rgb: 34, 197, 94; --success-soft: rgba(34, 197, 94, 0.16);
+    --danger:  #f05252; --danger-rgb: 240, 82, 82;  --danger-soft:  rgba(240, 82, 82, 0.16);
+    --warning: #f59e0b; --warning-rgb: 245, 158, 11; --warning-soft: rgba(245, 158, 11, 0.16);
+
+    --u-vencida: #f05252; --u-vencida-soft: rgba(240, 82, 82, 0.16);
+    --u-hoy:     #fb7a3c; --u-hoy-soft:     rgba(251, 122, 60, 0.16);
+    --u-pronto:  #fbbf24; --u-pronto-soft:  rgba(251, 191, 36, 0.15);
+    --u-semana:  #eab308; --u-semana-soft:  rgba(234, 179, 8, 0.15);
+    --u-ok:      #34d399; --u-ok-soft:      rgba(52, 211, 153, 0.15);
+    --u-none:    #9aa4b2; --u-none-soft:    rgba(154, 164, 178, 0.16);
+
+    // Superficies: 3 niveles sobre fondo grafito (no negro plano)
+    --bg:            #0f1115;
+    --surface:       #171a21;
+    --surface-2:     #1b1f28;
+    --surface-elev:  #1e222b;
+    --surface-sunken:#0c0e12;
+    --border:        rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --overlay:       rgba(0, 0, 0, 0.6);
+    --pressed:       rgba(255, 255, 255, 0.06);
+
+    --header-a: #1a1f27;
+    --header-b: #0f1115;
+    --on-header: #f3f4f6;
+    --on-header-dim: rgba(255, 255, 255, 0.60);
+    --header-tile: rgba(255, 255, 255, 0.07);
+    --header-tile-border: rgba(255, 255, 255, 0.10);
+
+    --text:   #f3f4f6;
+    --text-2: #c7cbd1;
+    --text-3: #9aa0aa;
+    --text-muted: #6b7280;
+
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-2: 0 8px 22px rgba(0, 0, 0, 0.55);
+
+    --pressed: rgba(255, 255, 255, 0.06);
+
+    // Gráficos (más brillantes en oscuro)
+    --chart-1: #60a5fa;
+    --chart-2: #38bdf8;
+    --chart-3: #34d399;
+    --chart-4: #fbbf24;
+    --chart-5: #f87171;
+    --chart-6: #a78bfa;
+    --chart-7: #2dd4bf;
+    --chart-8: #f472b6;
+    --chart-grid: rgba(255, 255, 255, 0.09);
+    --chart-text: #9aa0aa;
+
+    // Ionic
+    --ion-background-color: var(--bg);
+    --ion-background-color-rgb: 15, 17, 21;
+    --ion-text-color: var(--text);
+    --ion-text-color-rgb: 243, 244, 246;
+    --ion-border-color: var(--border);
+    --ion-item-background: var(--surface);
+    --ion-toolbar-background: var(--surface);
+    --ion-card-background: var(--surface);
+    --ion-tab-bar-background: var(--surface);
+
+    --ion-color-primary-contrast: var(--on-accent);
+    --ion-color-primary-contrast-rgb: 11, 18, 32;
+    --ion-color-primary-tint: #7bb4fb;
+  }
 }

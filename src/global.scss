@@ -1,37 +1,85 @@
-/*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
- */
-
 /* Core CSS required for Ionic components to work properly */
 @import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
-
-/* Optional CSS utils that can be commented out */
 @import "@ionic/angular/css/padding.css";
-@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/flex-utils.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
-@import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+/* Modo oscuro por preferencia del sistema (variables internas de Ionic) */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+/* Tipografía Inter empaquetada localmente (sin CDN, funciona sin internet) */
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+
+/* ===========================================================================
+   Base
+   =========================================================================== */
+:root { color-scheme: light dark; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+ion-content { --background: var(--bg); }
+
+/* Números tabulares (montos, fechas, contadores) */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* Toolbar grafito con degradado sutil (cabeceras de la app) */
+.grafito-toolbar {
+  --background: linear-gradient(135deg, var(--header-a) 0%, var(--header-b) 100%);
+  --color: var(--on-header);
+  --border-width: 0;
+  --min-height: 52px;
+}
+
+/* Barra de pestañas inferior */
+ion-tab-bar {
+  --background: var(--surface);
+  --border: 0.5px solid var(--border);
+  border-top: 0.5px solid var(--border);
+  padding-top: var(--sp-4);
+}
+ion-tab-button {
+  --color: var(--text-3);
+  --color-selected: var(--accent);
+  font-weight: var(--fw-medium);
+}
+ion-tab-button ion-label { font-size: var(--fs-12); }
+
+/* Foco accesible para elementos táctiles propios */
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===========================================================================
+   Animaciones (respetan prefers-reduced-motion)
+   =========================================================================== */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { 0% { background-position: -320px 0; } 100% { background-position: 320px 0; } }
+@keyframes popIn { 0% { opacity: 0; transform: scale(0.9); } 60% { transform: scale(1.03); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes slideUpBar { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.animate-in { animation: fadeUp var(--dur) var(--ease) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
