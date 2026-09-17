@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar class="grafito-toolbar">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/tabs/pendientes" text="Atrás"></ion-back-button>
     </ion-buttons>
@@ -7,137 +7,258 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
+<ion-content [fullscreen]="true">
   @if (loading()) {
-    <div class="center"><ion-spinner name="crescent"></ion-spinner></div>
-  } @else if (!cuenta()) {
-    <div class="center empty">
-      <ion-icon name="document-text-outline"></ion-icon>
-      <p>No se encontró la cuenta.</p>
+    <div class="wrap">
+      <div class="grid">
+        <div class="col col-a">
+          <section class="card">
+            <div class="sk-row">
+              <app-skeleton w="72px" h="20px" radius="var(--r-pill)"></app-skeleton>
+              <app-skeleton w="90px" h="20px" radius="var(--r-pill)"></app-skeleton>
+            </div>
+            <app-skeleton w="70%" h="26px"></app-skeleton>
+            <app-skeleton w="40%" h="14px"></app-skeleton>
+            <app-skeleton w="55%" h="34px"></app-skeleton>
+          </section>
+          <section class="card">
+            <app-skeleton w="45%" h="14px"></app-skeleton>
+            <app-skeleton w="100%" h="12px" radius="var(--r-pill)"></app-skeleton>
+            <div class="sk-row">
+              <app-skeleton w="30%" h="34px"></app-skeleton>
+              <app-skeleton w="30%" h="34px"></app-skeleton>
+              <app-skeleton w="30%" h="34px"></app-skeleton>
+            </div>
+          </section>
+        </div>
+        <div class="col col-b">
+          <section class="card">
+            <app-skeleton w="40%" h="16px"></app-skeleton>
+            <app-skeleton w="100%" h="14px"></app-skeleton>
+            <app-skeleton w="80%" h="14px"></app-skeleton>
+            <app-skeleton w="90%" h="14px"></app-skeleton>
+          </section>
+        </div>
+      </div>
     </div>
+  } @else if (!cuenta()) {
+    <app-empty-state
+      icon="document-text-outline"
+      title="No se encontró la cuenta"
+      message="Es posible que ya no esté disponible o haya cambiado de estado."
+    ></app-empty-state>
   } @else {
     @let c = cuenta()!;
+    @let hayAcciones = c.estado === 'PENDIENTE' || c.estado === 'REVISADO';
 
-    <div class="detalle">
-    <div class="col col-a">
-    <ion-card class="head-card">
-      <ion-card-content>
-        <div class="head-row">
-          <ion-badge color="tertiary">{{ c.empresa_abreviatura || c.empresa }}</ion-badge>
-          <ion-badge color="medium">{{ c.estado }}</ion-badge>
+    <div class="wrap animate-in" [class.has-bar]="hayAcciones">
+      <div class="grid">
+        <!-- ── Columna A: cabecera + progreso + vencimiento ── -->
+        <div class="col col-a">
+          <!-- Cabecera destacada -->
+          <section class="card head">
+            <div class="badges">
+              <app-empresa-badge [text]="c.empresa_abreviatura || c.empresa || '—'"></app-empresa-badge>
+              <app-estado-badge [estado]="c.estado"></app-estado-badge>
+            </div>
+            <h1 class="benef">{{ c.beneficiario || 'Sin beneficiario' }}</h1>
+            @if (c.nit_beneficiario) {
+              <p class="nit tnum">NIT {{ c.nit_beneficiario }}</p>
+            }
+            <div class="monto tnum">{{ cop(c.valor_solicitado) }}</div>
+            @if (c.link) {
+              <button class="btn-soporte" type="button" (click)="abrirSoporte(c.link)">
+                <ion-icon name="document-text-outline"></ion-icon>
+                Ver soporte
+              </button>
+            }
+          </section>
+
+          <!-- Progreso de pago -->
+          <section class="card prog">
+            <div class="prog-head">
+              <span class="cap">Progreso de pago</span>
+              <span class="pct tnum">{{ progreso().pct | number: '1.0-0' }}%</span>
+            </div>
+            <div
+              class="bar"
+              role="progressbar"
+              [attr.aria-valuenow]="progreso().pct | number: '1.0-0'"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span class="fill" [style.width.%]="progreso().pct"></span>
+            </div>
+            <div class="mini">
+              <div class="m">
+                <span class="l">Solicitado</span>
+                <span class="v tnum">{{ cop(progreso().solicitado) }}</span>
+              </div>
+              <div class="m">
+                <span class="l">Pagado</span>
+                <span class="v tnum">{{ cop(progreso().pagado) }}</span>
+              </div>
+              <div class="m alert">
+                <span class="l">Pendiente</span>
+                <span class="v tnum">{{ cop(progreso().pendiente) }}</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Aviso de vencimiento -->
+          <div class="venc" [attr.data-c]="venc().cls">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>{{ venc().label }}</span>
+          </div>
         </div>
-        <h1>{{ c.beneficiario || 'Sin beneficiario' }}</h1>
-        @if (c.nit_beneficiario) {
-          <p class="nit">NIT {{ c.nit_beneficiario }}</p>
+
+        <!-- ── Columna B: información + retenciones + pagos ── -->
+        <div class="col col-b">
+          <!-- Información -->
+          <section class="card">
+            <h2 class="ttl">Información</h2>
+            <div class="kv-grid">
+              @if (c.concepto) {
+                <div class="kv full">
+                  <span class="k">Concepto</span>
+                  <span class="v">{{ c.concepto }}</span>
+                </div>
+              }
+              @if (c.tipo) {
+                <div class="kv">
+                  <span class="k">Tipo</span>
+                  <span class="v">{{ c.tipo }}</span>
+                </div>
+              }
+              @if (c.centro_costo) {
+                <div class="kv">
+                  <span class="k">Centro de costo</span>
+                  <span class="v">{{ c.centro_costo }}</span>
+                </div>
+              }
+              @if (c.numero_factura) {
+                <div class="kv">
+                  <span class="k">N.° factura</span>
+                  <span class="v tnum">{{ c.numero_factura }}</span>
+                </div>
+              }
+              @if (c.numero_lote) {
+                <div class="kv">
+                  <span class="k">N.° lote</span>
+                  <span class="v tnum">{{ c.numero_lote }}</span>
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Retenciones -->
+          @if (tieneRetenciones) {
+            @let r = retenciones()!;
+            <section class="card">
+              <h2 class="ttl">Retenciones</h2>
+              <div class="ret">
+                @if (r.iva !== null && r.iva !== undefined) {
+                  <div class="ret-row">
+                    <span class="k">IVA</span>
+                    <span class="v tnum">{{ cop(r.iva) }}</span>
+                  </div>
+                }
+                @if (r.retefuente !== null && r.retefuente !== undefined) {
+                  <div class="ret-row">
+                    <span class="k">Retefuente</span>
+                    <span class="v tnum">{{ cop(r.retefuente) }}</span>
+                  </div>
+                }
+                @if (r.reteica !== null && r.reteica !== undefined) {
+                  <div class="ret-row">
+                    <span class="k">ReteICA</span>
+                    <span class="v tnum">{{ cop(r.reteica) }}</span>
+                  </div>
+                }
+                @if (r.reteiva !== null && r.reteiva !== undefined) {
+                  <div class="ret-row">
+                    <span class="k">ReteIVA</span>
+                    <span class="v tnum">{{ cop(r.reteiva) }}</span>
+                  </div>
+                }
+                <div class="ret-row total">
+                  <span class="k">Total retenciones</span>
+                  <span class="v tnum">{{ cop(r.total_retenciones) }}</span>
+                </div>
+                <div class="ret-row neto">
+                  <span class="k">Valor neto</span>
+                  <span class="v tnum">{{ cop(r.valor_neto) }}</span>
+                </div>
+              </div>
+            </section>
+          }
+
+          <!-- Pagos -->
+          <section class="card">
+            <h2 class="ttl">Pagos</h2>
+            @if (pagos().length === 0) {
+              <p class="nota">Sin pagos registrados.</p>
+            } @else {
+              <ul class="pagos">
+                @for (p of pagos(); track p.id) {
+                  <li class="pago">
+                    <div class="pl">
+                      <span class="pv tnum">{{ cop(p.valor) }}</span>
+                      <span class="pf tnum">{{ fecha(p.fecha_pago) }}</span>
+                    </div>
+                    <div class="pr">
+                      <span class="pb">{{ p.banco || 'Banco n/d' }}</span>
+                      @if (p.referencia) {
+                        <span class="pref">Ref: {{ p.referencia }}</span>
+                      }
+                    </div>
+                    @if (p.soporte_url) {
+                      <button
+                        class="pico"
+                        type="button"
+                        aria-label="Ver soporte del pago"
+                        (click)="abrirSoporte(p.soporte_url)"
+                      >
+                        <ion-icon name="open-outline"></ion-icon>
+                      </button>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de acciones fija -->
+    @if (hayAcciones) {
+      <app-action-bar>
+        @if (c.estado === 'PENDIENTE') {
+          <button class="ab-btn primary" type="button" [disabled]="saving()" (click)="confirmar('REVISADO')">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            Marcar revisado
+          </button>
+        } @else {
+          <button class="ab-btn success" type="button" [disabled]="saving()" (click)="confirmar('APROBADO')">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            Aprobar
+          </button>
         }
-        <div class="valor">{{ cop(c.valor_solicitado) }}</div>
-      </ion-card-content>
-    </ion-card>
-
-    <ion-card>
-      <ion-card-header><ion-card-title>Información</ion-card-title></ion-card-header>
-      <ion-card-content>
-        <ion-list lines="full">
-          <ion-item><ion-label><p>Empresa</p><h3>{{ c.empresa || '—' }}</h3></ion-label></ion-item>
-          <ion-item><ion-label><p>Concepto</p><h3>{{ c.concepto || '—' }}</h3></ion-label></ion-item>
-          <ion-item><ion-label><p>Tipo</p><h3>{{ c.tipo || '—' }}</h3></ion-label></ion-item>
-          <ion-item><ion-label><p>Centro de costo</p><h3>{{ c.centro_costo || '—' }}</h3></ion-label></ion-item>
-          <ion-item><ion-label><p>N.° factura</p><h3>{{ c.numero_factura || '—' }}</h3></ion-label></ion-item>
-          <ion-item><ion-label><p>N.° lote</p><h3>{{ c.numero_lote || '—' }}</h3></ion-label></ion-item>
-          <ion-item><ion-label><p>Vencimiento</p><h3>{{ fecha(c.fecha_vencimiento) }}</h3></ion-label></ion-item>
-          <ion-item><ion-label><p>Valor solicitado</p><h3>{{ cop(c.valor_solicitado) }}</h3></ion-label></ion-item>
-          <ion-item><ion-label><p>Valor pagado</p><h3>{{ cop(c.valor_pagado) }}</h3></ion-label></ion-item>
-          <ion-item lines="none"><ion-label><p>Valor pendiente</p><h3>{{ cop(c.valor_pendiente) }}</h3></ion-label></ion-item>
-        </ion-list>
-
-        @if (c.link) {
-          <ion-button expand="block" fill="outline" class="mt" (click)="abrirSoporte(c.link)">
-            <ion-icon slot="start" name="document-text-outline"></ion-icon>
-            Ver soporte de la cuenta
-          </ion-button>
-        }
-      </ion-card-content>
-    </ion-card>
-    </div><!-- col-a -->
-
-    <div class="col col-b">
-    @if (tieneRetenciones) {
-      @let r = retenciones()!;
-      <ion-card>
-        <ion-card-header><ion-card-title>Retenciones</ion-card-title></ion-card-header>
-        <ion-card-content>
-          <ion-list lines="full">
-            @if (r.iva !== null && r.iva !== undefined) {
-              <ion-item><ion-label><p>IVA</p><h3>{{ cop(r.iva) }}</h3></ion-label></ion-item>
-            }
-            @if (r.retefuente !== null && r.retefuente !== undefined) {
-              <ion-item><ion-label><p>Retefuente</p><h3>{{ cop(r.retefuente) }}</h3></ion-label></ion-item>
-            }
-            @if (r.reteica !== null && r.reteica !== undefined) {
-              <ion-item><ion-label><p>ReteICA</p><h3>{{ cop(r.reteica) }}</h3></ion-label></ion-item>
-            }
-            @if (r.reteiva !== null && r.reteiva !== undefined) {
-              <ion-item><ion-label><p>ReteIVA</p><h3>{{ cop(r.reteiva) }}</h3></ion-label></ion-item>
-            }
-            <ion-item><ion-label><p>Total retenciones</p><h3>{{ cop(r.total_retenciones) }}</h3></ion-label></ion-item>
-            <ion-item lines="none" class="neto">
-              <ion-label><p>Valor neto</p><h3>{{ cop(r.valor_neto) }}</h3></ion-label>
-            </ion-item>
-          </ion-list>
-        </ion-card-content>
-      </ion-card>
+        <button class="ab-btn danger" type="button" [disabled]="saving()" (click)="confirmar('NEGADO')">
+          <ion-icon name="close-circle-outline"></ion-icon>
+          Negar
+        </button>
+      </app-action-bar>
     }
 
-    <ion-card>
-      <ion-card-header><ion-card-title>Pagos</ion-card-title></ion-card-header>
-      <ion-card-content>
-        @if (pagos().length === 0) {
-          <ion-note class="muted">Sin pagos registrados.</ion-note>
-        } @else {
-          <ion-list lines="full">
-            @for (p of pagos(); track p.id) {
-              <ion-item>
-                <ion-label>
-                  <h3>{{ cop(p.valor) }}</h3>
-                  <p>{{ fecha(p.fecha_pago) }} · {{ p.banco || 'Banco n/d' }}</p>
-                  @if (p.referencia) { <p>Ref: {{ p.referencia }}</p> }
-                </ion-label>
-                @if (p.soporte_url) {
-                  <ion-button slot="end" fill="clear" size="small" (click)="abrirSoporte(p.soporte_url)">
-                    <ion-icon slot="icon-only" name="open-outline"></ion-icon>
-                  </ion-button>
-                }
-              </ion-item>
-            }
-          </ion-list>
-        }
-      </ion-card-content>
-    </ion-card>
-    </div><!-- col-b -->
-
-    @if (c.estado === 'PENDIENTE' || c.estado === 'REVISADO') {
-      <div class="acciones">
-        @if (c.estado === 'PENDIENTE') {
-          <ion-button expand="block" color="success" [disabled]="saving()" (click)="confirmar('REVISADO')">
-            <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
-            Marcar revisado
-          </ion-button>
-        }
-        @if (c.estado === 'REVISADO') {
-          <ion-button expand="block" color="success" [disabled]="saving()" (click)="confirmar('APROBADO')">
-            <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
-            Aprobar
-          </ion-button>
-        }
-        <ion-button expand="block" color="danger" fill="outline" [disabled]="saving()" (click)="confirmar('NEGADO')">
-          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
-          Negar
-        </ion-button>
-        @if (saving()) {
-          <div class="center"><ion-spinner name="crescent"></ion-spinner></div>
-        }
+    <!-- Overlay de éxito -->
+    @if (exito()) {
+      <div class="exito" role="status" aria-label="Cuenta actualizada">
+        <div class="check">
+          <ion-icon name="checkmark-outline"></ion-icon>
+        </div>
       </div>
     }
-    </div><!-- .detalle -->
   }
 </ion-content>

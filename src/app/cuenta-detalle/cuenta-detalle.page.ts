@@ -1,4 +1,4 @@
-import { Component, inject, signal, Input, OnInit } from '@angular/core';
+import { Component, computed, inject, signal, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -8,36 +8,31 @@ import {
   IonButtons,
   IonBackButton,
   IonContent,
-  IonCard,
-  IonCardHeader,
-  IonCardTitle,
-  IonCardContent,
-  IonList,
-  IonItem,
-  IonLabel,
-  IonButton,
   IonIcon,
-  IonSpinner,
-  IonBadge,
-  IonNote,
   AlertController,
   ToastController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
   documentTextOutline,
-  cardOutline,
   checkmarkCircleOutline,
   closeCircleOutline,
   openOutline,
-  receiptOutline,
-  businessOutline,
+  calendarOutline,
+  checkmarkOutline,
 } from 'ionicons/icons';
 import { Browser } from '@capacitor/browser';
 import { ApiService } from '../core/api.service';
 import { AuthService } from '../core/auth.service';
 import { Cuenta, Pago, Retenciones } from '../core/models';
 import { formatCOP, formatDate, toNumber } from '../core/format';
+import { EstadoBadge, EmpresaBadge, ActionBar, Skeleton, EmptyState } from '../shared';
+
+/** Límites de días para clasificar la urgencia por vencimiento. */
+const LIM = { PRONTO: 3, SEMANA: 7 } as const;
+const INF = Number.MAX_SAFE_INTEGER;
+
+type UrgKey = 'vencida' | 'hoy' | 'pronto' | 'semana' | 'ok' | 'none';
 
 @Component({
   selector: 'app-cuenta-detalle',
@@ -51,18 +46,12 @@ import { formatCOP, formatDate, toNumber } from '../core/format';
     IonButtons,
     IonBackButton,
     IonContent,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
-    IonList,
-    IonItem,
-    IonLabel,
-    IonButton,
     IonIcon,
-    IonSpinner,
-    IonBadge,
-    IonNote,
+    EstadoBadge,
+    EmpresaBadge,
+    ActionBar,
+    Skeleton,
+    EmptyState,
   ],
 })
 export class CuentaDetallePage implements OnInit {
@@ -79,6 +68,7 @@ export class CuentaDetallePage implements OnInit {
   readonly pagos = signal<Pago[]>([]);
   readonly loading = signal(true);
   readonly saving = signal(false);
+  readonly exito = signal(false);
 
   readonly cop = formatCOP;
   readonly fecha = formatDate;
@@ -86,12 +76,11 @@ export class CuentaDetallePage implements OnInit {
   constructor() {
     addIcons({
       documentTextOutline,
-      cardOutline,
       checkmarkCircleOutline,
       closeCircleOutline,
       openOutline,
-      receiptOutline,
-      businessOutline,
+      calendarOutline,
+      checkmarkOutline,
     });
   }
 
@@ -150,6 +139,49 @@ export class CuentaDetallePage implements OnInit {
     return !!r && (toNumber(r.total_retenciones) > 0 || toNumber(r.valor_neto) > 0);
   }
 
+  // ── Progreso de pago (pagado vs. solicitado) ──
+  readonly progreso = computed(() => {
+    const c = this.cuenta();
+    const solicitado = toNumber(c?.valor_solicitado);
+    const pagado = toNumber(c?.valor_pagado);
+    const pendiente = toNumber(c?.valor_pendiente);
+    const pct = solicitado > 0 ? Math.min(100, Math.max(0, (pagado / solicitado) * 100)) : 0;
+    return { solicitado, pagado, pendiente, pct };
+  });
+
+  // ── Aviso de vencimiento (clase de urgencia + etiqueta legible) ──
+  readonly venc = computed<{ cls: UrgKey; label: string }>(() => {
+    const d = this.dias(this.cuenta()?.fecha_vencimiento);
+    const cls = this.urgKey(d);
+    if (d === INF) return { cls, label: 'Sin fecha de vencimiento' };
+    const f = formatDate(this.cuenta()?.fecha_vencimiento);
+    if (d < 0) {
+      const n = -d;
+      return { cls, label: `Vencida hace ${n} ${n === 1 ? 'día' : 'días'} (${f})` };
+    }
+    if (d === 0) return { cls, label: `Vence hoy (${f})` };
+    return { cls, label: `Vence en ${d} ${d === 1 ? 'día' : 'días'} (${f})` };
+  });
+
+  private dias(fecha?: string): number {
+    if (!fecha) return INF;
+    const p = String(fecha).substring(0, 10).split('-').map(Number);
+    if (p.length < 3 || !p[0]) return INF;
+    const fv = new Date(p[0], p[1] - 1, p[2]);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    return Math.round((fv.getTime() - hoy.getTime()) / 86400000);
+  }
+
+  private urgKey(d: number): UrgKey {
+    if (d === INF) return 'none';
+    if (d < 0) return 'vencida';
+    if (d === 0) return 'hoy';
+    if (d <= LIM.PRONTO) return 'pronto';
+    if (d <= LIM.SEMANA) return 'semana';
+    return 'ok';
+  }
+
   async abrirSoporte(path: string | undefined | null): Promise<void> {
     const url = this.api.fileUrl(path);
     if (!url) return;
@@ -192,8 +224,11 @@ export class CuentaDetallePage implements OnInit {
       next: async () => {
         this.saving.set(false);
         this.api.cuentaSeleccionada.set(null);
+        this.exito.set(true);
         await this.mostrarToast('Cuenta actualizada correctamente.', 'success');
-        this.router.navigate(['/tabs/pendientes'], { replaceUrl: true });
+        setTimeout(() => {
+          this.router.navigate(['/tabs/pendientes'], { replaceUrl: true });
+        }, 700);
       },
       error: async (err) => {
         this.saving.set(false);
